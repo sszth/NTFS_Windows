@@ -1,23 +1,23 @@
-#pragma once
+ï»¿#pragma once
 /*******************************************************************************************************************************************
-*	2021Äê4ÔÂ30ÈÕ16:51:42	»º´æ ¸ºÔğ¶ÁÈ¡´ÅÅÌÊı¾İ²¢½¨Á¢»º´æ
-*	2021Äê4ÔÂ30ÈÕ16:51:53	Ä¿Ç°Ê¹ÓÃÖÇÄÜÖ¸ÕëµÄÒıÓÃ¼ÆÊıÅĞ¶ÏÊÇ·ñ±»Õ¼ÓÃ  ´óÓÚ1±»Õ¼ÓÃ
-*	2021Äê5ÔÂ5ÈÕ21:15:46	CHXBufferDataPtrºóĞø¿¼ÂÇ×Ô¶¨ÒåÖÇÄÜÖ¸Õë£¬¿ÉÒÔÖ±½ÓÓÃÒıÓÃ¼ÆÊıÅĞ¶Ï.ËøµÄÎÊÌâ¿ÉÓÃ¶ÁĞ´ËøÀ´½øĞĞÓÅ»¯£¬²¢ÇÒ¿ÉÒÔ¿¼ÂÇÔÚbufferÖĞ¼ÓËø
-*	2021Äê5ÔÂ5ÈÕ22:07:29	µ¥¸öbuffer±ØĞëÔÚm_u64BufferSizeÒÔÏÂ
-*	
-*	
-*	
-*	
-*	
-*	
-*	
-*	
-*	
+*	2021å¹´4æœˆ30æ—¥16:51:42	ç¼“å­˜ è´Ÿè´£è¯»å–ç£ç›˜æ•°æ®å¹¶å»ºç«‹ç¼“å­˜
+*	2021å¹´4æœˆ30æ—¥16:51:53	ç›®å‰ä½¿ç”¨æ™ºèƒ½æŒ‡é’ˆçš„å¼•ç”¨è®¡æ•°åˆ¤æ–­æ˜¯å¦è¢«å ç”¨  å¤§äº1è¢«å ç”¨
+*	2021å¹´5æœˆ5æ—¥21:15:46	CHXBufferDataPtråç»­è€ƒè™‘è‡ªå®šä¹‰æ™ºèƒ½æŒ‡é’ˆï¼Œå¯ä»¥ç›´æ¥ç”¨å¼•ç”¨è®¡æ•°åˆ¤æ–­.é”çš„é—®é¢˜å¯ç”¨è¯»å†™é”æ¥è¿›è¡Œä¼˜åŒ–ï¼Œå¹¶ä¸”å¯ä»¥è€ƒè™‘åœ¨bufferä¸­åŠ é”
+*	2021å¹´5æœˆ5æ—¥22:07:29	å•ä¸ªbufferå¿…é¡»åœ¨m_u64BufferSizeä»¥ä¸‹
 *
-*	ÄÚ´æĞ¹Â©¼ì²é
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*	å†…å­˜æ³„æ¼æ£€æŸ¥
 *******************************************************************************************************************************************/
-#include <QMutex> 
-//#include <atomic>
+//#include <QMutex> 
+#include <shared_mutex>
 
 class CHXBufferPool
 {
@@ -29,52 +29,52 @@ public:
 	void Initialization();
 	void Clear();
 
-	LPBYTE GetPoolBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD & i32Readsiz);
+	LPBYTE GetPoolBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD& i32Readsiz);
 
 public:
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡¿ÉÓÃ»º³å,²¢Õ¼ÓÃ
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–å¯ç”¨ç¼“å†²,å¹¶å ç”¨
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	CHXBufferDataPtr GetBuffer();
 
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				ÊÍ·ÅBuffer
+	 *  å‡½æ•°æè¿°:
+	 *				é‡Šæ”¾Buffer
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	void RealseBuffer(CHXBufferDataPtr pBuffer);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				·µ»ØÕ¼ÓÃÊı
+	 *  å‡½æ•°æè¿°:
+	 *				è¿”å›å ç”¨æ•°
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	UINT32 Length();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				·µ»Ø´óĞ¡
+	 *  å‡½æ•°æè¿°:
+	 *				è¿”å›å¤§å°
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	UINT32 Size();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				·µ»ØÊ£Óà¿Õ¼ä
+	 *  å‡½æ•°æè¿°:
+	 *				è¿”å›å‰©ä½™ç©ºé—´
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	UINT32 RemainSize();
 	void FreeBuffer(LPBYTE pBuffer);
@@ -83,15 +83,16 @@ public:
 
 	void SetValid(bool bValid = false);
 private:
-	QReadWriteLock		m_lock;
-	//	µ¥¸ö»º³åÇø´óĞ¡
+	std::shared_mutex m_lock;
+	//QReadWriteLock		m_lock;
+	//	å•ä¸ªç¼“å†²åŒºå¤§å°
 	UINT32				m_u64BufferSize;
-	//	»º³åÇø¸öÊı
+	//	ç¼“å†²åŒºä¸ªæ•°
 	UINT32				m_u64BufferNumber;
-	//	³ØÖĞ³¤¶È
+	//	æ± ä¸­é•¿åº¦
 	UINT64				m_u64PoolLength;
 	UINT32				m_u32Current;
-	ListHXBufferPtr		m_listBufferPool;
+	VectorHXBufferPtr		m_listBufferPool;
 	//QMutex				m_mutexPool;
 	//std::atomic<bool>	m_bValid;		// true is valid
 };

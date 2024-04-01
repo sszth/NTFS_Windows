@@ -1,8 +1,14 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include <iostream>
+
+#ifdef _HX_USE_QT_
 #include <QTime>
 #include <QDebug>
+#else
+#include <chrono>
+#endif // _HX_USE_QT_
+
 
 #include "../HXCommon/HXExplorerCmd.h"
 
@@ -13,8 +19,8 @@ extern "C"
 HXNTFSPLUGIN_EXPORT
 int HX_Initialize(
 	int iID,
-	const QString & strPluginName,
-	const QString & strPluginDll,
+	const std::wstring & strPluginName,
+	const std::wstring & strPluginDll,
 	IHXPluginObjectPtr & pPlugin)
 {
 	pPlugin =
@@ -38,18 +44,22 @@ int CHXNTFSPlugin::Release()
 	return 0;
 }
 
-int CHXNTFSPlugin::OnCmd(UINT32 i32Cmd, void * pParam, void * pReturn)
+int CHXNTFSPlugin::OnCmd(UINT32 i32Cmd, void* pParam, void* pReturn)
 {
 	INT32 i32Result = 0;
-	
+
 	switch ((HXExplorerPluginCmd)i32Cmd)
 	{
 	case HXExplorerPluginCmd::HXExplorerPluginCmd_ReadDirectory:
 	{
+#ifdef _HX_USE_QT_
 		QTime time;
 		time.start();
+#else
+		auto begin = std::chrono::high_resolution_clock::now();
+#endif // _HX_USE_QT_
 		LPHXReadDirectory pDir = (LPHXReadDirectory)pParam;
-		qInfo() << "Directory File Cmd Recevie:" << pDir->m_wstrDirectory;
+		//qInfo() << "Directory File Cmd Recevie:" << pDir->m_wstrDirectory;
 		CHXNTFSPartitionPtr pPartition = GetPartition(pDir->m_wstrDirectory);
 		if (nullptr == pPartition)
 		{
@@ -60,22 +70,34 @@ int CHXNTFSPlugin::OnCmd(UINT32 i32Cmd, void * pParam, void * pReturn)
 		std::sort(pDir->m_listFileInfo.begin(), pDir->m_listFileInfo.end(), [](auto item, auto itemTmp)
 			{
 				Q_ASSERT(nullptr != item && nullptr != itemTmp);
-				return item->m_szFileName.compare(itemTmp->m_szFileName, Qt::CaseInsensitive) <= 0 ? true : false;
+				// TODO: 大小写
+
+				std::transform(itemTmp->m_szFileName.begin(), itemTmp->m_szFileName.end(), itemTmp->m_szFileName.begin(), ::tolower);
+				std::transform(item->m_szFileName.begin(), item->m_szFileName.end(), item->m_szFileName.begin(), ::tolower);
+				return item->m_szFileName.compare(itemTmp->m_szFileName) <= 0 ? true : false;
 			}
 		);
-		QString s;
+
+#ifdef _HX_USE_QT_
+		std::wstring s;
 		s = time.elapsed() / 1000.0;
 		qInfo() << time.elapsed() / 1000.0 << "s";
+#else
+		auto end = std::chrono::high_resolution_clock::now();
+		auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+		printf("Time measured: %.3f seconds.\n", elapsed.count() * 1e-9);
+#endif // _HX_USE_QT_
 		break;
 	}
 	case HXExplorerPluginCmd::HXExplorerPluginCmd_ReadFile:
 	{
 		LPHXReadFileInfo pFileInfo = (LPHXReadFileInfo)pParam;
-		qInfo() << "Read File Cmd Recevie:" << pFileInfo->m_wstrDirectory;
+		//qInfo() << "Read File Cmd Recevie:" << pFileInfo->m_wstrDirectory;
 		CHXNTFSPartitionPtr pPartition = GetPartition(pFileInfo->m_wstrDirectory);
 		if (nullptr == pPartition)
 		{
-			qCritical() << "Get Partition Failed!";
+			assert(0);
+			//qCritical() << "Get Partition Failed!";
 			return -1;
 		}
 		i32Result = pPartition->ReadFile(pFileInfo);
@@ -84,11 +106,12 @@ int CHXNTFSPlugin::OnCmd(UINT32 i32Cmd, void * pParam, void * pReturn)
 	case HXExplorerPluginCmd::HXExplorerPluginCmd_Refresh:
 	{
 		LPHXRefreshFileInfo pFileInfo = (LPHXRefreshFileInfo)pParam;
-		qInfo() << "Refresh File Cmd Recevie:" << pFileInfo->m_wstrDirectory;
+		//qInfo() << "Refresh File Cmd Recevie:" << pFileInfo->m_wstrDirectory;
 		CHXNTFSPartitionPtr pPartition = GetPartition(pFileInfo->m_wstrDirectory);
 		if (nullptr == pPartition)
 		{
-			qCritical() << "Get Partition Failed!";
+			assert(0);
+			//qCritical() << "Get Partition Failed!";
 			return -1;
 		}
 		pPartition->Refresh();
@@ -104,30 +127,52 @@ void CHXNTFSPlugin::Clear()
 {
 }
 
-QString CHXNTFSPlugin::GetPartitionName(const QString & strFileName)
+size_t Replace(std::wstring& strValue, const std::wstring& strOld, const std::wstring& strNew)
 {
-	QString strPartition = strFileName;
-	strPartition.replace(u8"/", u8"\\");
-	int i32Pos = strPartition.indexOf(u8"\\");
+	size_t iCount = 0;
+	if (strOld.empty())
+		return iCount;
+	std::wstring::size_type iFind = 0;
+	while (true)
+	{
+		iFind = strValue.find(strOld, iFind);
+		if (std::wstring::npos == iFind)
+			break;
+		strValue.replace(iFind, strOld.size(), strNew);
+		++iCount;
+		iFind += strNew.size();
+	}
+	return iCount;
+}
+
+std::wstring CHXNTFSPlugin::GetPartitionName(const std::wstring& strFileName)
+{
+	std::wstring strPartition = strFileName;
+	Replace(strPartition, L"/", L"\\");
+	int i32Pos = strPartition.find(L"\\");
 	if (-1 != i32Pos)
 	{
-		strPartition = strPartition.mid(0, i32Pos);
+		strPartition = strPartition.substr(0, i32Pos);
 	}
 	return strPartition;
 }
 
 
-CHXNTFSPartitionPtr CHXNTFSPlugin::CreatePartition(const QString & strFileName)
+CHXNTFSPartitionPtr CHXNTFSPlugin::CreatePartition(const std::wstring& strFileName)
 {
-	QString strPartition = GetPartitionName(strFileName);
+	std::wstring strPartition = GetPartitionName(strFileName);
+#ifdef _HX_USE_QT_
 	CHXNTFSPartitionPtr pPartition = QSharedPointer<CHXNTFSPartition>(new CHXNTFSPartition(strPartition));
+#else
+	CHXNTFSPartitionPtr pPartition = nullptr;// std::make_shared<CHXNTFSPartition>(new CHXNTFSPartition(strPartition));
+#endif // _HX_USE_QT_
 	m_listPartition.push_back(pPartition);
 	return pPartition;
 }
 
-CHXNTFSPartitionPtr CHXNTFSPlugin::GetPartition(const QString & strFileName)
+CHXNTFSPartitionPtr CHXNTFSPlugin::GetPartition(const std::wstring& strFileName)
 {
-	QString strPartition = GetPartitionName(strFileName);
+	std::wstring strPartition = GetPartitionName(strFileName);
 	CHXNTFSPartitionPtr pResult = nullptr;
 	for (size_t i = 0; i < m_listPartition.length(); i++)
 	{

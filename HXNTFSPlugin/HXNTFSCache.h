@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "HXNTFSType.h"
 #include "HXBufferPool.h"
@@ -14,46 +14,46 @@ public:
 public:
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½¨Á¢»º´æ
+	 *  å‡½æ•°æè¿°:
+	 *				å»ºç«‹ç¼“å­˜
 	 */
-	int		BuildCache(const QString & strPartitionName);
-	int		BuildCache(const LCNType & lcn);
+	int		BuildCache(const std::wstring& strPartitionName);
+	int		BuildCache(const LCNType& lcn);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡BPBĞÅÏ¢
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–BPBä¿¡æ¯
 	 */
 	CHXBPBPtr GetBPB();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡Ò»¸ö´Ø´óĞ¡
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–ä¸€ä¸ªç°‡å¤§å°
 	 *
 	 */
 	UINT64	GetClusterSize();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡Ã¿¸öMFT´óĞ¡
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–æ¯ä¸ªMFTå¤§å°
 	 */
 	UINT32	GetMFTSize();
 
 
-	
+
 	//LPHXFileRecordHeader GetSerialNumberFileRecord(UINT64 u64MFTID);
 
 	//LCNType & GetLCN();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡Ö¸¶¨Î»ÖÃµÄbuffer
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–æŒ‡å®šä½ç½®çš„buffer
 	 */
-	LPBYTE	ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD & i32Readsize, DWORD i32MoveMethod);
+	LPBYTE	ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD& i32Readsize, DWORD i32MoveMethod);
 
 	void FreeBuffer(LPBYTE pBuffer);
 	void FreeUsed(CHXBufferDataPtr pBuffer);
@@ -62,36 +62,36 @@ public:
 private:
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡$MFT
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–$MFT
 	 */
 	LPHXFileRecordHeader		GetFileRecordHeaderMFT();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡µÚ5¸ömft(Root MFT)
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–ç¬¬5ä¸ªmft(Root MFT)
 	 *
 	 */
 	LPHXFileRecordHeader GetRootFileRecord();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-					´ò¿ª´ÅÅÌ
-	 *	strFileName	´ÅÅÌÄ¿Â¼
+	 *  å‡½æ•°æè¿°:
+					æ‰“å¼€ç£ç›˜
+	 *	strFileName	ç£ç›˜ç›®å½•
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	int	OpenDisk();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				¹Ø±Õ´ÅÅÌ£¬²¢½«»º´æÊÍ·Å
-	 *	strFileName	´ÅÅÌÄ¿Â¼
+	 *  å‡½æ•°æè¿°:
+	 *				å…³é—­ç£ç›˜ï¼Œå¹¶å°†ç¼“å­˜é‡Šæ”¾
+	 *	strFileName	ç£ç›˜ç›®å½•
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	int CloseDisk();
 
@@ -100,39 +100,39 @@ private:
 private:
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				BPBĞÅÏ¢
+	 *  å‡½æ•°æè¿°:
+	 *				BPBä¿¡æ¯
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	int GetBPBInfo();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				¼ÆËãMFT´óĞ¡
+	 *  å‡½æ•°æè¿°:
+	 *				è®¡ç®—MFTå¤§å°
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	void CalcMFTSize();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				³õÊ¼»¯»º³åÇø
+	 *  å‡½æ•°æè¿°:
+	 *				åˆå§‹åŒ–ç¼“å†²åŒº
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
 	void InitBufferPool();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡¿ÉÓÃ»º³å
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–å¯ç”¨ç¼“å†²
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
-	CHXBufferDataPtr GetBuffer(DWORD i32FileRecordSize, DWORD & i32Readsize);
+	CHXBufferDataPtr GetBuffer(DWORD i32FileRecordSize, DWORD& i32Readsize);
 public:
 	void Clear();
 
@@ -145,18 +145,18 @@ private:
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-					¶ÁÈ¡´ÅÅÌĞÅÏ¢
+	 *  å‡½æ•°æè¿°:
+					è¯»å–ç£ç›˜ä¿¡æ¯
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
-	int ReadDiskBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD & i32Readsize, DWORD i32MoveMethod, LPBYTE pBuffer);
+	int ReadDiskBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD& i32Readsize, DWORD i32MoveMethod, LPBYTE pBuffer);
 
 	void SetUsed(CHXBufferDataPtr pBuffer, bool bUsed = true);
 private:
 	UINT32			m_u32MFTSize;
 	HANDLE			m_hDisk;
-	QString			m_strPartitionName;
+	std::wstring			m_strPartitionName;
 	CHXBPBPtr		m_pBPB;
 #ifdef _HX_ONLYONEBUFFERPOOL_
 	static CHXBufferPool	m_bufferPool;
@@ -169,11 +169,12 @@ private:
 
 
 	LCNType			m_vecType;
+#ifdef _HX_USE_QT_
 	QReadWriteLock	m_lock;
-
-
+#else
+	std::shared_mutex m_lock;
+#endif // _HX_USE_QT_
 	//LCNType					m_vecLCN;
-
 };
 
 _HX_DECLAR_SHARED_POINTER(HXNTFSCache);

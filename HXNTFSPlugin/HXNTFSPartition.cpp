@@ -1,11 +1,11 @@
-#include "stdafx.h"
-#include <Qset>
-#include <QPair>
-#include <QDebug>
+ï»¿#include "stdafx.h"
+//#include <Qset>
+//#include <QPair>
+//#include <QDebug>
 
 #include "HXNTFSPartition.h"
 
-//	BPB´óĞ¡
+//	BPBå¤§å°
 const static int g_cs_i32BPBSize = 512;
 const static bool g_cs_bFindMFTBase = false;
 int CHXNTFSPartition::Initlize()
@@ -17,23 +17,23 @@ void CHXNTFSPartition::Clear()
 {
 }
 
-const QString & CHXNTFSPartition::GetPartitionName()
+const std::wstring& CHXNTFSPartition::GetPartitionName()
 {
 	return m_strPartitionName;
 }
 
-int CHXNTFSPartition::FindDirectory(LPHXReadDirectory pDirectory, VecFileInfo & listFileIno)
+int CHXNTFSPartition::FindDirectory(LPHXReadDirectory pDirectory, VecFileInfo& listFileIno)
 {
-	//	1.ÅĞ¶ÏÊÇ·ñÎª¸ùÄ¿Â¼ÇÒµÚÒ»´Î²éÕÒ
+	//	1.åˆ¤æ–­æ˜¯å¦ä¸ºæ ¹ç›®å½•ä¸”ç¬¬ä¸€æ¬¡æŸ¥æ‰¾
 	UINT64 i64MFTLocation;
 	if (0 == GetDirectoryMFT(pDirectory->m_wstrDirectory, i64MFTLocation))
 	{
-		qInfo() << "Partition Root File Cmd Recevie :" << pDirectory->m_wstrDirectory;
+		//qInfo() << "Partition Root File Cmd Recevie :" << pDirectory->m_wstrDirectory;
 		ParseRootDirectoryMFT(pDirectory, listFileIno);
 		return 0;
 	}
 
-	qInfo() << "Partition File Cmd Recevie:" << pDirectory->m_wstrDirectory;
+	//qInfo() << "Partition File Cmd Recevie:" << pDirectory->m_wstrDirectory;
 	if (-1 == FindDirectory(pDirectory, i64MFTLocation, listFileIno))
 	{
 		return -1;
@@ -42,13 +42,13 @@ int CHXNTFSPartition::FindDirectory(LPHXReadDirectory pDirectory, VecFileInfo & 
 	return 0;
 }
 
-LPBYTE CHXNTFSPartition::ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD & i32Readsize, DWORD i32MoveMethod, CHXBufferType i32Type)
+LPBYTE CHXNTFSPartition::ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD& i32Readsize, DWORD i32MoveMethod, CHXBufferType i32Type)
 {
 	LPBYTE pBuffer = m_pCache->ReadBuffer(i64FilePointer, i32FileRecordSize, i32Readsize, i32MoveMethod);
 	if (CHXBufferType_INDEX == i32Type)
 	{
 		LPHXIndexHeader pIndexHeader = (LPHXIndexHeader)pBuffer;
-		
+
 		if (pIndexHeader->m_i32Flag != 0x58444e49)
 		{
 			Q_ASSERT(0);
@@ -74,7 +74,7 @@ LPBYTE CHXNTFSPartition::ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileR
 	{
 	case CHXBufferType_INDEX:
 	{
-		//	Êµ¼ÊÊ¹ÓÃ´óĞ¡
+		//	å®é™…ä½¿ç”¨å¤§å°
 		UINT32 u32FileSize = min(i32Readsize, i32FileRecordSize);
 		UINT32 u32FileIndex = 0;
 		LPHXIndexHeader pIndexHeader = (LPHXIndexHeader)pBuffer;
@@ -85,7 +85,7 @@ LPBYTE CHXNTFSPartition::ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileR
 			{
 				break;
 			}
-			int i32 = pIndexHeader->m_i16UpdateSequenceNumberSize-1;
+			int i32 = pIndexHeader->m_i16UpdateSequenceNumberSize - 1;
 			for (size_t i = 0; i < i32; i++)
 			{
 				UINT16 hx = *(UINT16*)((LPBYTE)pIndexHeader + u32SectorSize * (i + 1) - 2);
@@ -104,10 +104,10 @@ LPBYTE CHXNTFSPartition::ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileR
 			pIndexHeader = (LPHXIndexHeader)(pBuffer + u32FileIndex);
 		}
 	}
-		break;
+	break;
 	case CHXBufferType_MFT:
 	{
-		// Ö»»áÈ¡Ò»¸öÎÄ¼ş¼ÇÂ¼  ËùÒÔ¸üĞÂĞòÁĞÖ»´¦ÀíÒ»¸ö
+		// åªä¼šå–ä¸€ä¸ªæ–‡ä»¶è®°å½•  æ‰€ä»¥æ›´æ–°åºåˆ—åªå¤„ç†ä¸€ä¸ª
 		LPHXFileRecordHeader pMFT = (LPHXFileRecordHeader)pBuffer;
 		UINT32 u32SectorSize = m_pCache->GetBPB()->m_i16SectorSize;
 		int i32 = pMFT->m_u32FileRecordRealSize / u32SectorSize;
@@ -120,13 +120,13 @@ LPBYTE CHXNTFSPartition::ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileR
 			{
 				break;
 			}
-			if (pMFT->m_i16UpdateIndex == *(INT16*)((LPBYTE)pMFT + u32SectorSize*(i+1) - 2))
+			if (pMFT->m_i16UpdateIndex == *(INT16*)((LPBYTE)pMFT + u32SectorSize * (i + 1) - 2))
 			{
 				memcpy_s((LPBYTE)pMFT + u32SectorSize * (i + 1) - 2, 2, ((INT16*)(&pMFT->m_i32UpdateArray) + i), 2);
 			}
 		}
 	}
-		break;
+	break;
 	case CHXBufferType_Unknown:
 	default:
 		break;
@@ -135,12 +135,12 @@ LPBYTE CHXNTFSPartition::ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileR
 }
 
 int CHXNTFSPartition::ParseMFTListBody(LPHXFileRecordListBody pListBody,
-									UINT64 u64AllSize,
-									QString strDir,
-									LCNType & listLCN,
-									BitMapType & listBitMap,
-									LPHXAttribute & pAttributeIndexRoot,
-									SetMFTNumber& setAlreadyParseMFT)
+	UINT64 u64AllSize,
+	std::wstring strDir,
+	LCNType& listLCN,
+	BitMapType& listBitMap,
+	LPHXAttribute& pAttributeIndexRoot,
+	SetMFTNumber& setAlreadyParseMFT)
 {
 	UINT64 u64RealReadSize = 0;
 	while (pListBody && u64RealReadSize < u64AllSize)
@@ -159,7 +159,7 @@ int CHXNTFSPartition::ParseMFTListBody(LPHXFileRecordListBody pListBody,
 
 //int CHXNTFSPartition::ParseMFTListBody(LPHXFileRecordListBody pListBody,
 //	UINT64 u64AllSize,
-//	QString strDir,
+//	std::wstring strDir,
 //	std::vector<LPHXAttribute> & vecAttribute,
 //	SetMFTNumber& setAlreadyParseMFT)
 //{
@@ -179,10 +179,10 @@ int CHXNTFSPartition::ParseMFTListBody(LPHXFileRecordListBody pListBody,
 //}
 
 int CHXNTFSPartition::ParseMFTList(LPHXAttribute pAttribute,
-	QString strDir,
-	LCNType & listLCN,
-	BitMapType & listBitMap,
-	LPHXAttribute & pAttributeIndexRoot,
+	std::wstring strDir,
+	LCNType& listLCN,
+	BitMapType& listBitMap,
+	LPHXAttribute& pAttributeIndexRoot,
 	SetMFTNumber& setAlreadyParseMFT)
 {
 	if (0 == pAttribute->m_u8PermanentFlag)
@@ -196,7 +196,7 @@ int CHXNTFSPartition::ParseMFTList(LPHXAttribute pAttribute,
 }
 
 //int CHXNTFSPartition::ParseMFTList(LPHXAttribute pAttribute,
-//	QString strDir,
+//	std::wstring strDir,
 //	std::vector<LPHXAttribute> & vecAttribute,
 //	SetMFTNumber& setAlreadyParseMFT)
 //{
@@ -210,12 +210,12 @@ int CHXNTFSPartition::ParseMFTList(LPHXAttribute pAttribute,
 //	}
 //}
 
-// 20H³£×¤Ã»ÓĞÊôĞÔÃû³Æ
-int CHXNTFSPartition::ParseMFTListPermanent(LPHXAttribute pAttribute,	
-	QString strDir,
-	LCNType & listLCN,
-	BitMapType & listBitMap,
-	LPHXAttribute & pAttributeIndexRoot,
+// 20Hå¸¸é©»æ²¡æœ‰å±æ€§åç§°
+int CHXNTFSPartition::ParseMFTListPermanent(LPHXAttribute pAttribute,
+	std::wstring strDir,
+	LCNType& listLCN,
+	BitMapType& listBitMap,
+	LPHXAttribute& pAttributeIndexRoot,
 	SetMFTNumber& setAlreadyParseMFT)
 {
 	DWORD u32RealReadSize = pAttribute->GetHeaderSize();
@@ -236,7 +236,7 @@ int CHXNTFSPartition::ParseMFTListPermanent(LPHXAttribute pAttribute,
 }
 
 //int CHXNTFSPartition::ParseMFTListPermanent(LPHXAttribute pAttribute,	
-//	QString strDir,
+//	std::wstring strDir,
 //	std::vector<LPHXAttribute> & vecAttribute,
 //	SetMFTNumber& setAlreadyParseMFT)
 //{
@@ -245,22 +245,22 @@ int CHXNTFSPartition::ParseMFTListPermanent(LPHXAttribute pAttribute,
 //	return ParseMFTListBody(pListBody, u32RealReadSize, strDir, vecAttribute, setAlreadyParseMFT);
 //}
 
-// 20H·Ç³£×¤
+// 20Héå¸¸é©»
 int CHXNTFSPartition::ParseMFTListVariable(LPHXAttribute pAttribute,
-	QString strDir,
-	LCNType & listLCN,
-	BitMapType & listBitMap,
-	LPHXAttribute & pAttributeIndexRoot,
+	std::wstring strDir,
+	LCNType& listLCN,
+	BitMapType& listBitMap,
+	LPHXAttribute& pAttributeIndexRoot,
 	SetMFTNumber& setAlreadyParseMFT)
 {
-	//	20µÄdata run
+	//	20çš„data run
 	LCNType listLCNTmp;
 	ParseData(pAttribute, listLCNTmp);
 	int i32hxNumber = 0;
 	LPBYTE pDataRunBuffer = nullptr;
 	INT64 i64Offset = 0;
 	UINT64 u64BodySize = pAttribute->m_unExpand.m_VariableAttribute.m_i64BodyRealSize;
-	//	¶¨Î»µ½Êı¾İÔËĞĞ TODO:Èç¹ûÒ»ÌõDataRun¹ı´ó  readbuffer»á³¬´ó
+	//	å®šä½åˆ°æ•°æ®è¿è¡Œ TODO:å¦‚æœä¸€æ¡DataRunè¿‡å¤§  readbufferä¼šè¶…å¤§
 	for (auto iter = listLCNTmp.begin(); iter != listLCNTmp.end(); iter++)
 	{
 		LARGE_INTEGER i64FirstDataRunPointer;
@@ -318,17 +318,17 @@ int CHXNTFSPartition::ParseMFTListVariable(LPHXAttribute pAttribute,
 }
 
 //int CHXNTFSPartition::ParseMFTListVariable(LPHXAttribute pAttribute,
-//	QString strDir,
+//	std::wstring strDir,
 //	std::vector<LPHXAttribute> & vecAttribute,
 //	SetMFTNumber& setAlreadyParseMFT)
 //{
-//	//	20µÄdata run
+//	//	20çš„data run
 //	LCNType listLCNTmp;
 //	ParseData(pAttribute, listLCNTmp);
 //	int i32hxNumber = 0;
 //	LPBYTE pDataRunBuffer = nullptr;
 //	INT64 i64Offset = 0;
-//	//	¶¨Î»µ½Êı¾İÔËĞĞ TODO:Èç¹ûÒ»ÌõDataRun¹ı´ó  readbuffer»á³¬´ó
+//	//	å®šä½åˆ°æ•°æ®è¿è¡Œ TODO:å¦‚æœä¸€æ¡DataRunè¿‡å¤§  readbufferä¼šè¶…å¤§
 //	for (auto iter = listLCNTmp.begin(); iter != listLCNTmp.end(); iter++)
 //	{
 //		LARGE_INTEGER i64FirstDataRunPointer;
@@ -416,14 +416,14 @@ int CHXNTFSPartition::ParseMFTListOnlyData(LPHXAttribute pAttribute, LPHXFindFil
 	}
 	else
 	{
-		//	20µÄdata run
+		//	20çš„data run
 		LCNType listLCNTmp;
 		ParseData(pAttribute, listLCNTmp);
 		int i32hxNumber = 0;
 		LPBYTE pDataRunBuffer = nullptr;
 		INT64 i64Offset = 0;
 		UINT64 u64BodySize = pAttribute->m_unExpand.m_VariableAttribute.m_i64BodyRealSize;
-		//	¶¨Î»µ½Êı¾İÔËĞĞ TODO:Èç¹ûÒ»ÌõDataRun¹ı´ó  readbuffer»á³¬´ó
+		//	å®šä½åˆ°æ•°æ®è¿è¡Œ TODO:å¦‚æœä¸€æ¡DataRunè¿‡å¤§  readbufferä¼šè¶…å¤§
 		for (auto iter = listLCNTmp.begin(); iter != listLCNTmp.end(); iter++)
 		{
 			LARGE_INTEGER i64FirstDataRunPointer;
@@ -467,7 +467,8 @@ int CHXNTFSPartition::ParseMFTListOnlyData(LPHXAttribute pAttribute, LPHXFindFil
 					{
 						i32RemainSize = i32RemainSize - u32RealReadSize;
 					}
-					Q_ASSERT_X(pDataRunBuffer != nullptr, "error", "ParseDataRun is null!");
+					assert(0);
+					//Q_ASSERT_X(pDataRunBuffer != nullptr, "error", "ParseDataRun is null!");
 				}
 			}
 			else
@@ -478,13 +479,13 @@ int CHXNTFSPartition::ParseMFTListOnlyData(LPHXAttribute pAttribute, LPHXFindFil
 			}
 		}
 
-		qCritical() << u8"CHXNTFSPartition::ParseMFTListOnlyData ·Ç³£×¤";
+		//qCritical() << u8"CHXNTFSPartition::ParseMFTListOnlyData éå¸¸é©»";
 	}
 
 	return 0;
 }
 
-int CHXNTFSPartition::ParseMFTListBodyOnlyData(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, LCNType & vecLCN, SetMFTNumber& setAlreadyParseMFT)
+int CHXNTFSPartition::ParseMFTListBodyOnlyData(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, LCNType& vecLCN, SetMFTNumber& setAlreadyParseMFT)
 {
 	UINT64 u64RealReadSize = 0;
 	while (pListBody && u64RealReadSize < u64AllSize)
@@ -501,24 +502,24 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(LPHXFileRecordListBody pListBody,
 	return 0;
 }
 
-int CHXNTFSPartition::ParseMFTListOnlyData(LPHXAttribute pAttribute, LCNType & vecLCN, SetMFTNumber& setAlreadyParseMFT)
+int CHXNTFSPartition::ParseMFTListOnlyData(LPHXAttribute pAttribute, LCNType& vecLCN, SetMFTNumber& setAlreadyParseMFT)
 {
 	if (0 == pAttribute->m_u8PermanentFlag)
 	{
 		DWORD u32RealReadSize = pAttribute->GetHeaderSize();
 		LPHXFileRecordListBody pListBody = (LPHXFileRecordListBody)((LPBYTE)pAttribute + u32RealReadSize);
-		return ParseMFTListBodyOnlyData(pListBody, pAttribute->GeAllSize()- u32RealReadSize, vecLCN, setAlreadyParseMFT);
+		return ParseMFTListBodyOnlyData(pListBody, pAttribute->GeAllSize() - u32RealReadSize, vecLCN, setAlreadyParseMFT);
 	}
 	else
 	{
-		//	20µÄdata run
+		//	20çš„data run
 		LCNType listLCNTmp;
 		ParseData(pAttribute, listLCNTmp);
 		int i32hxNumber = 0;
 		LPBYTE pDataRunBuffer = nullptr;
 		INT64 i64Offset = 0;
 		UINT64 u64BodySize = pAttribute->m_unExpand.m_VariableAttribute.m_i64BodyRealSize;
-		//	¶¨Î»µ½Êı¾İÔËĞĞ TODO:Èç¹ûÒ»ÌõDataRun¹ı´ó  readbuffer»á³¬´ó
+		//	å®šä½åˆ°æ•°æ®è¿è¡Œ TODO:å¦‚æœä¸€æ¡DataRunè¿‡å¤§  readbufferä¼šè¶…å¤§
 		for (auto iter = listLCNTmp.begin(); iter != listLCNTmp.end(); iter++)
 		{
 			LARGE_INTEGER i64FirstDataRunPointer;
@@ -562,7 +563,7 @@ int CHXNTFSPartition::ParseMFTListOnlyData(LPHXAttribute pAttribute, LCNType & v
 					{
 						i32RemainSize = i32RemainSize - u32RealReadSize;
 					}
-					Q_ASSERT_X(pDataRunBuffer != nullptr, "error", "ParseDataRun is null!");
+					//Q_ASSERT_X(pDataRunBuffer != nullptr, "error", "ParseDataRun is null!");
 				}
 			}
 			else
@@ -572,23 +573,24 @@ int CHXNTFSPartition::ParseMFTListOnlyData(LPHXAttribute pAttribute, LCNType & v
 				m_pCache->FreeBuffer(pDataRunBuffer);
 			}
 		}
-		qCritical() << u8"CHXNTFSPartition::ParseMFTListOnlyData ·Ç³£×¤";
+		//qCritical() << u8"CHXNTFSPartition::ParseMFTListOnlyData éå¸¸é©»";
 	}
 
 	return 0;
 }
 
-int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType & vecLCN, SetMFTNumber& setAlreadyParseMFT)
+int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType& vecLCN, SetMFTNumber& setAlreadyParseMFT)
 {
 	LPHXFileRecordHeader pMFT = GetSerialNumberFileRecord(u64MFTSerialNumber);
 	if (nullptr == pMFT)
 	{
-		qCritical() << "ParseMFTListBodyOnlyData Failed";
+		assert(0);
+		//qCritical() << "ParseMFTListBodyOnlyData Failed";
 		return -1;
 	}
 
 	INT32 i32HasReadByte = pMFT->m_i16FirstAttribute;
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä				
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…				
 	while (i32HasReadByte < pMFT->m_u32FileRecordRealSize)
 	{
 		LPHXAttribute pAttributeTmp = (LPHXAttribute)((BYTE*)pMFT + i32HasReadByte);
@@ -613,7 +615,7 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType 
 		i32HasReadByte += pAttributeTmp->m_i32TotalLength;
 	}
 	i32HasReadByte = pMFT->m_i16FirstAttribute;
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä				
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…				
 	while (i32HasReadByte < pMFT->m_u32FileRecordRealSize)
 	{
 		LPHXAttribute pAttributeTmp = (LPHXAttribute)((BYTE*)pMFT + i32HasReadByte);
@@ -622,7 +624,8 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType 
 		case HXAttribute_List:
 			if (-1 == ParseMFTListOnlyData(pAttributeTmp, vecLCN, setAlreadyParseMFT))
 			{
-				qCritical() << "ParseMFTListBodyOnlyData->ParseMFTListOnlyData Failed";
+				assert(0);
+				//qCritical() << "ParseMFTListBodyOnlyData->ParseMFTListOnlyData Failed";
 				return -1;
 			}
 			break;
@@ -644,7 +647,7 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType 
 }
 //
 //int CHXNTFSPartition::ParseMFTListBody(
-//	QString strDir,
+//	std::wstring strDir,
 //	UINT64 u64MFTSerialNumber,
 //	std::vector<LPHXAttribute> &vecAttribute,
 //	SetMFTNumber& setAlreadyParseMFT)
@@ -659,7 +662,7 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType 
 //
 //	INT32 i32HasReadByte = pMFT->m_i16FirstAttribute;
 //
-//	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä				
+//	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…				
 //	while (i32HasReadByte < pMFT->m_u32FileRecordRealSize)
 //	{
 //		LPHXAttribute pAttributeTmp = (LPHXAttribute)((BYTE*)pMFT + i32HasReadByte);
@@ -690,43 +693,44 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType 
 //	return 0;
 //}
 
-int CHXNTFSPartition::GetDirectoryMFT(const QString & strDir, UINT64 & u64MFTPoint)
+int CHXNTFSPartition::GetDirectoryMFT(const std::wstring& strDir, UINT64& u64MFTPoint)
 {
 	u64MFTPoint = 0L;
 	auto iter = m_hashDirectoryMFT.find(strDir);
 	if (iter != m_hashDirectoryMFT.end())
-	{
-		u64MFTPoint = iter.value();
+	{		
+		u64MFTPoint = iter->second;
 		return 1;
 	}
 	return 0;
 }
 
-int CHXNTFSPartition::ParseRootDirectoryMFT(LPHXReadDirectory pDir, VecFileInfo & listFileInfo)
+int CHXNTFSPartition::ParseRootDirectoryMFT(LPHXReadDirectory pDir, VecFileInfo& listFileInfo)
 {
 	m_pCache->BuildCache(m_strPartitionName);
 	LPHXFileRecordHeader pFileRecordRoot = GetRootFileRecord();
 	if (nullptr == pFileRecordRoot)
 	{
-		Q_ASSERT_X(nullptr != pFileRecordRoot, "Error", "Get Root File Record Failed!");
+		assert(0);
+		//Q_ASSERT_X(nullptr != pFileRecordRoot, "Error", "Get Root File Record Failed!");
 		return -1;
 	}
 
 	ParseFileRecordMFT(m_vecLCN);
 	m_pCache->BuildCache(m_vecLCN);
-	qInfo() << "Partition Root MFT LCN Number:" << QString::number(m_vecLCN.size());
+	//qInfo() << "Partition Root MFT LCN Number:" << std::wstring::number(m_vecLCN.size());
 	ParseDirectoryMFT(pFileRecordRoot, pDir->m_wstrDirectory, listFileInfo);
 	m_pCache->FreeBuffer((LPBYTE)pFileRecordRoot);
 	return 0;
 }
 
-int CHXNTFSPartition::SetDirectoryMFT(const QString & strDir, UINT64 u64MFTPoint)
+int CHXNTFSPartition::SetDirectoryMFT(const std::wstring& strDir, UINT64 u64MFTPoint)
 {
 	m_hashDirectoryMFT[strDir] = u64MFTPoint;
 	return 0;
 }
 
-int CHXNTFSPartition::ParseFileRecordMFT(LCNType & vecLCN)
+int CHXNTFSPartition::ParseFileRecordMFT(LCNType& vecLCN)
 {
 	LPHXFileRecordHeader pFileRecord = GetFileRecordHeaderMFT();
 	ParseMFTAttributeOnlyData(pFileRecord, vecLCN);
@@ -737,7 +741,7 @@ int CHXNTFSPartition::ParseFileRecordMFT(LCNType & vecLCN)
 int CHXNTFSPartition::ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord, LCNType& vecLCN)
 {
 	SetMFTNumber mft;
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä ÏÈ½âÎö80·ÀÖ¹20ÕÒ²»µ½Êı¾İ
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é… å…ˆè§£æ80é˜²æ­¢20æ‰¾ä¸åˆ°æ•°æ®
 	INT32 i32HasReadByte = pFileRecord->m_i16FirstAttribute;
 	while (i32HasReadByte < pFileRecord->m_u32FileRecordRealSize)
 	{
@@ -756,7 +760,7 @@ int CHXNTFSPartition::ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord
 		}
 		i32HasReadByte += pAttributeTmp->m_i32TotalLength;
 	}
-	//	½âÎö20
+	//	è§£æ20
 	i32HasReadByte = pFileRecord->m_i16FirstAttribute;
 	while (i32HasReadByte < pFileRecord->m_u32FileRecordRealSize)
 	{
@@ -786,7 +790,7 @@ int CHXNTFSPartition::ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord
 
 int CHXNTFSPartition::ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord, LPHXFindFileParam pFindFileParam)
 {
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…
 	INT32 i32HasReadByte = pFileRecord->m_i16FirstAttribute;
 	while (i32HasReadByte < pFileRecord->m_u32FileRecordRealSize)
 	{
@@ -807,7 +811,7 @@ int CHXNTFSPartition::ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord
 			pFindFileParam->m_u16CompressFlage = pAttributeTmp->m_u16CompressFlage;
 			if (0 == pFindFileParam->m_u8PermanentFlag)
 			{
-				// Èç¹ûÎª³£×¤ÊôĞÔ ²»»á³¬¹ıÒ»¸ömft´óĞ¡
+				// å¦‚æœä¸ºå¸¸é©»å±æ€§ ä¸ä¼šè¶…è¿‡ä¸€ä¸ªmftå¤§å°
 				pFindFileParam->m_u8PermanentSize = pAttributeTmp->m_unExpand.m_PermanentAttribute.m_i32BodyLength;
 				pFindFileParam->m_pPermanentBuffer = new BYTE[pFindFileParam->m_u8PermanentSize];
 				if (0 != pFindFileParam->m_u8PermanentSize)
@@ -825,7 +829,7 @@ int CHXNTFSPartition::ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord
 				data.m_u64EndCluster = pAttributeTmp->m_unExpand.m_VariableAttribute.m_i64BodyEndCluster;
 				ParseData(pAttributeTmp, data.m_vecLCN);
 				pFindFileParam->m_vecVCN.push_back(data);
-				//	ÒÔ»ñÈ¡µ½µÚÒ»¸ö80ÊôĞÔÎª×¼ÔİÊ±Î´¿¼ÂÇ¶àÁ÷Çé¿ö
+				//	ä»¥è·å–åˆ°ç¬¬ä¸€ä¸ª80å±æ€§ä¸ºå‡†æš‚æ—¶æœªè€ƒè™‘å¤šæµæƒ…å†µ
 				if (0 == pFindFileParam->m_u64SpaceSize)
 				{
 					pFindFileParam->m_u64SpaceSize = pAttributeTmp->m_unExpand.m_VariableAttribute.m_i64BodySpaceSize;
@@ -846,23 +850,23 @@ int CHXNTFSPartition::ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord
 	return 0;
 }
 
-int CHXNTFSPartition::ParseDirectoryMFT(LPHXFileRecordHeader pFileRecord, QString strDir, VecFileInfo & listFileInfo)
+int CHXNTFSPartition::ParseDirectoryMFT(LPHXFileRecordHeader pFileRecord, std::wstring strDir, VecFileInfo& listFileInfo)
 {
 	ParseDirectoryMFTAttribute(pFileRecord, strDir, listFileInfo);
 	return 0;
 }
 
-int CHXNTFSPartition::ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecord, QString strDir, VecFileInfo & listFileInfo)
+int CHXNTFSPartition::ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecord, std::wstring strDir, VecFileInfo& listFileInfo)
 {
-	//	4.¸ù¾İË÷ÒıÎ»ÖÃÕÒË÷Òı£¬Íê³ÉºóÇ¨Îªµ¥¸öº¯Êı¡£·µ»ØÃ¿ÌõDataRunÎ»ÖÃË÷ÒıÎ»ÖÃºÍÎ»Í¼ĞÅÏ¢
+	//	4.æ ¹æ®ç´¢å¼•ä½ç½®æ‰¾ç´¢å¼•ï¼Œå®Œæˆåè¿ä¸ºå•ä¸ªå‡½æ•°ã€‚è¿”å›æ¯æ¡DataRunä½ç½®ç´¢å¼•ä½ç½®å’Œä½å›¾ä¿¡æ¯
 	LCNType listLCN;
 	BitMapType listBitMap;
-	//	Ë÷Òı¸ù
+	//	ç´¢å¼•æ ¹
 	LPHXAttribute pAttributeRoot = nullptr;
 
 	SetMFTNumber setAlreadyParseMFT;
 	setAlreadyParseMFT.insert(pFileRecord->m_i64FileRecordReferenceNumber);
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…
 	INT32 i32HasReadByte = pFileRecord->m_i16FirstAttribute;
 	while (i32HasReadByte < pFileRecord->m_u32FileRecordRealSize)
 	{
@@ -879,7 +883,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecor
 		{
 			pAttributeRoot = pAttributeTmp;
 		}
-		//	½âÎöAOHÊôĞÔ
+		//	è§£æAOHå±æ€§
 		else if (HXAttribute_IndexAllocation == pAttributeTmp->m_i32Flag)
 		{
 			if (-1 == ParseIndexAlloc(pAttributeTmp, listLCN))
@@ -888,7 +892,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecor
 				return -1;
 			}
 		}
-		//	½âÎöBOHÊôĞÔ
+		//	è§£æBOHå±æ€§
 		else if (HXAttribute_Bitmap == pAttributeTmp->m_i32Flag)
 		{
 			if (-1 == ParseBitMap(pAttributeTmp, listBitMap))
@@ -912,7 +916,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecor
 		return -1;
 	}
 
-	//	Ğ£Ñé´óĞ¡Ë÷Òı
+	//	æ ¡éªŒå¤§å°ç´¢å¼•
 	int i32Result = ParseIndexRoot(pAttributeRoot, strDir, listFileInfo);
 	if (-1 == i32Result)
 	{
@@ -923,7 +927,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecor
 		return 0;
 	}
 
-	//	´¦ÀíDataRun
+	//	å¤„ç†DataRun
 	CHXIndexParam indexParam;
 	indexParam.m_strDir = strDir;
 	//indexParam.m_pBuffer = (LPBYTE)pFileRecord;
@@ -932,7 +936,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecor
 	return 0;
 }
 
-int CHXNTFSPartition::ParseIndexAlloc(LPHXAttribute pAttribute, LCNType & listLCN)
+int CHXNTFSPartition::ParseIndexAlloc(LPHXAttribute pAttribute, LCNType& listLCN)
 {
 	listLCN.clear();
 
@@ -943,7 +947,7 @@ int CHXNTFSPartition::ParseIndexAlloc(LPHXAttribute pAttribute, LCNType & listLC
 		int i32Offset = GetLCN(pDataRun, listLCN);
 		if (-1 == i32Offset)
 		{
-			//	¶ÁÈ¡´íÎó
+			//	è¯»å–é”™è¯¯
 			break;
 		}
 		pDataRun += i32Offset;
@@ -953,13 +957,13 @@ int CHXNTFSPartition::ParseIndexAlloc(LPHXAttribute pAttribute, LCNType & listLC
 	return 0;
 }
 
-int CHXNTFSPartition::GetLCN(LPBYTE pDataRun, LCNType & listLCN)
+int CHXNTFSPartition::GetLCN(LPBYTE pDataRun, LCNType& listLCN)
 {
 	INT8 i8High = *pDataRun >> 4;
 	INT8 i8low = *pDataRun & 0x0f;
 	if (0 == i8High || 0 == i8low)
 	{
-		//	¶ÁÈ¡Ê§°Ü
+		//	è¯»å–å¤±è´¥
 		return -1;
 	}
 	pDataRun += 1;
@@ -983,7 +987,7 @@ int CHXNTFSPartition::GetLCN(LPBYTE pDataRun, LCNType & listLCN)
 	}
 	INT64 i64Cluster = 0;
 
-	//	LSNÈç¹ûÎª¸ºÊı´¦Àí
+	//	LSNå¦‚æœä¸ºè´Ÿæ•°å¤„ç†
 	bool bMinus = false;
 	if (vecDataRunCluster[i8High - 1] >> 7)
 	{
@@ -1006,16 +1010,16 @@ int CHXNTFSPartition::GetLCN(LPBYTE pDataRun, LCNType & listLCN)
 	return i8High + i8low + 1;
 }
 
-int CHXNTFSPartition::ParseDirectoryMFTAttributeForFind(LPHXFileRecordHeader pFileRecord, QString strDir, QString strFileName, UINT64 & u64MFTNumber)
+int CHXNTFSPartition::ParseDirectoryMFTAttributeForFind(LPHXFileRecordHeader pFileRecord, std::wstring strDir, std::wstring strFileName, UINT64& u64MFTNumber)
 {
-	//	4.¸ù¾İË÷ÒıÎ»ÖÃÕÒË÷Òı£¬Íê³ÉºóÇ¨Îªµ¥¸öº¯Êı¡£·µ»ØÃ¿ÌõDataRunÎ»ÖÃË÷ÒıÎ»ÖÃºÍÎ»Í¼ĞÅÏ¢
+	//	4.æ ¹æ®ç´¢å¼•ä½ç½®æ‰¾ç´¢å¼•ï¼Œå®Œæˆåè¿ä¸ºå•ä¸ªå‡½æ•°ã€‚è¿”å›æ¯æ¡DataRunä½ç½®ç´¢å¼•ä½ç½®å’Œä½å›¾ä¿¡æ¯
 	LCNType listLCN;
 	BitMapType listBitMap;
-	//	Ë÷Òı¸ù
+	//	ç´¢å¼•æ ¹
 	LPHXAttribute pAttributeRoot = nullptr;
 	SetMFTNumber setAlreadyParseMFT;
 	setAlreadyParseMFT.insert(pFileRecord->m_i64FileRecordReferenceNumber);
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…
 	INT32 i32HasReadByte = pFileRecord->m_i16FirstAttribute;
 	while (i32HasReadByte < pFileRecord->m_u32FileRecordRealSize)
 	{
@@ -1031,7 +1035,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttributeForFind(LPHXFileRecordHeader pFi
 		{
 			pAttributeRoot = pAttributeTmp;
 		}
-		//	½âÎöAOHÊôĞÔ
+		//	è§£æAOHå±æ€§
 		else if (HXAttribute_IndexAllocation == pAttributeTmp->m_i32Flag)
 		{
 			if (-1 == ParseIndexAlloc(pAttributeTmp, listLCN))
@@ -1039,7 +1043,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttributeForFind(LPHXFileRecordHeader pFi
 				return -1;
 			}
 		}
-		//	½âÎöBOHÊôĞÔ
+		//	è§£æBOHå±æ€§
 		else if (HXAttribute_Bitmap == pAttributeTmp->m_i32Flag)
 		{
 			if (-1 == ParseBitMap(pAttributeTmp, listBitMap))
@@ -1062,7 +1066,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttributeForFind(LPHXFileRecordHeader pFi
 		return -1;
 	}
 
-	//	Ğ£Ñé´óĞ¡Ë÷Òı
+	//	æ ¡éªŒå¤§å°ç´¢å¼•
 	int i32Result = ParseIndexRootForFind(pAttributeRoot, strDir, u64MFTNumber);
 	if (-1 == i32Result)
 	{
@@ -1073,7 +1077,7 @@ int CHXNTFSPartition::ParseDirectoryMFTAttributeForFind(LPHXFileRecordHeader pFi
 		return 0;
 	}
 
-	//	´¦ÀíDataRun
+	//	å¤„ç†DataRun
 	CHXIndexParam indexParam;
 	indexParam.m_bFindFile = TRUE;
 	indexParam.m_strDir = strDir;
@@ -1100,7 +1104,7 @@ UINT64 CHXNTFSPartition::GetClusterSize()
 	return m_pCache->GetClusterSize();
 }
 
-bool CHXNTFSPartition::IsRoot(const QString & strFile)
+bool CHXNTFSPartition::IsRoot(const std::wstring& strFile)
 {
 	return 0 == strFile.compare(m_strPartitionName);
 }
@@ -1110,7 +1114,7 @@ LPHXFileRecordHeader CHXNTFSPartition::GetSerialNumberFileRecord(INT64 i64MFTSer
 	LPHXFileRecordHeader pFileRecord = nullptr;
 	UINT32 i32FileRecordSize = GetBufferSize();
 	INT64 i64MFTOffset = i64MFTSerialNumber * GetMFTSize();
-	// Ä¿±ê´ØÎ»ÖÃ
+	// ç›®æ ‡ç°‡ä½ç½®
 	INT64 i64ClusterOffset = 0;
 	DWORD u32RealReadSize = 0;
 	Q_ASSERT(m_vecLCN.size() != 0);
@@ -1120,7 +1124,7 @@ LPHXFileRecordHeader CHXNTFSPartition::GetSerialNumberFileRecord(INT64 i64MFTSer
 		INT64 i64MFTClusterOffset = i64MFTOffset - m_vecLCN[i].second * GetClusterSize();
 		if (i64MFTClusterOffset < 0)
 		{
-			//	Æ«ÒÆ¾ÍÔÚ´Ë´Ø
+			//	åç§»å°±åœ¨æ­¤ç°‡
 			LARGE_INTEGER i64Location;
 			i64Location.QuadPart = i64MFTOffset + i64ClusterOffset;
 			pFileRecord = (LPHXFileRecordHeader)ReadBuffer(i64Location, i32FileRecordSize, u32RealReadSize, FILE_BEGIN, CHXBufferType_MFT);
@@ -1134,7 +1138,7 @@ LPHXFileRecordHeader CHXNTFSPartition::GetSerialNumberFileRecord(INT64 i64MFTSer
 	return nullptr;
 }
 
-// ¿ÉÄÜ»á´æÔÚ
+// å¯èƒ½ä¼šå­˜åœ¨
 int CHXNTFSPartition::HaveSubFile(INT64 i64MFTSerialNumber, LPHXFileInfo pFileInfo)
 {
 	if (nullptr == pFileInfo)
@@ -1150,15 +1154,15 @@ int CHXNTFSPartition::HaveSubFile(INT64 i64MFTSerialNumber, LPHXFileInfo pFileIn
 	INT32 i32HasReadByte = pMFT->m_i16FirstAttribute;
 
 	VecFileInfo listFileInfo;
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä				
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…				
 	while (i32HasReadByte < pMFT->m_u32FileRecordRealSize)
 	{
 		LPHXAttribute pAttributeTmp = (LPHXAttribute)((BYTE*)pMFT + i32HasReadByte);
 
 		if (HXAttribute_IndexRoot == pAttributeTmp->m_i32Flag)
 		{
-			QString strDir;
-			// TODO:¿ÉÄÜ´æÔÚÄ¿Â¼¹ıÉîÇé¿ö  Ä¿Ç°ÔİÊ±²»¿¼ÂÇ
+			std::wstring strDir;
+			// TODO:å¯èƒ½å­˜åœ¨ç›®å½•è¿‡æ·±æƒ…å†µ  ç›®å‰æš‚æ—¶ä¸è€ƒè™‘
 			int i32Result = ParseIndexRoot(pAttributeTmp, strDir, listFileInfo);
 		}
 		else if (HXAttribute_Unknow == pAttributeTmp->m_i32Flag)
@@ -1203,11 +1207,11 @@ int CHXNTFSPartition::GetMFTBaseInfo(INT64 i64MFTSerialNumber, LPHXFileInfo pFil
 
 	INT32 i32HasReadByte = pMFT->m_i16FirstAttribute;
 
-	//	ÎÄ¼şÃû Ä¿Ç°Ö»ÓÃ»ñÈ¡×îºóÒ»¸ö
+	//	æ–‡ä»¶å ç›®å‰åªç”¨è·å–æœ€åä¸€ä¸ª
 	//std::vector<LPHXAttribute> arrFileName;
 	LPHXAttribute pAttributeFileName = nullptr;
 
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä				
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…				
 	while (i32HasReadByte < pMFT->m_u32FileRecordRealSize)
 	{
 		LPHXAttribute pAttributeTmp = (LPHXAttribute)((BYTE*)pMFT + i32HasReadByte);
@@ -1228,7 +1232,7 @@ int CHXNTFSPartition::GetMFTBaseInfo(INT64 i64MFTSerialNumber, LPHXFileInfo pFil
 		i32HasReadByte += pAttributeTmp->m_i32TotalLength;
 	}
 
-	//	ÎÄ¼şÃû
+	//	æ–‡ä»¶å
 	if (pAttributeFileName)
 	{
 		LPHXFileRecordFileNameBody pBody = (LPHXFileRecordFileNameBody)((LPBYTE)pAttributeFileName + pAttributeFileName->m_unExpand.m_PermanentAttribute.m_i32BodyOffset);
@@ -1262,13 +1266,13 @@ int CHXNTFSPartition::GetMFTBaseInfo(INT64 i64MFTSerialNumber, LPHXFileInfo pFil
 	return 0;
 }
 
-void CHXNTFSPartition::GetIndexName(LPHXIndex pIndex, QString & strFileName)
+void CHXNTFSPartition::GetIndexName(LPHXIndex pIndex, std::wstring& strFileName)
 {
 	int i32NameLength = pIndex->m_u8FileNameLength;
 	wchar_t* p = new wchar_t[i32NameLength];
 	memcpy_s(p, i32NameLength * 2, (&pIndex->m_u8ArrName), i32NameLength * 2);
 	//p[i32NameLength] = 0;
-	strFileName = QString::fromWCharArray(p, i32NameLength);
+	strFileName = p;
 	delete[]p;
 }
 
@@ -1306,7 +1310,7 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT64 u64MFTSerialNumber, LPHXFi
 
 	INT32 i32HasReadByte = pMFT->m_i16FirstAttribute;
 
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä				
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…				
 	while (i32HasReadByte < pMFT->m_u32FileRecordRealSize)
 	{
 		LPHXAttribute pAttributeTmp = (LPHXAttribute)((BYTE*)pMFT + i32HasReadByte);
@@ -1324,7 +1328,7 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT64 u64MFTSerialNumber, LPHXFi
 			pFindFileParam->m_u16CompressFlage = pAttributeTmp->m_u16CompressFlage;
 			if (0 == pFindFileParam->m_u8PermanentFlag)
 			{
-				// Èç¹ûÎª³£×¤ÊôĞÔ ²»»á³¬¹ıÒ»¸ömft´óĞ¡
+				// å¦‚æœä¸ºå¸¸é©»å±æ€§ ä¸ä¼šè¶…è¿‡ä¸€ä¸ªmftå¤§å°
 				pFindFileParam->m_u8PermanentSize = pAttributeTmp->m_i32TotalLength - pAttributeTmp->GetHeaderSize() + 1;
 				pFindFileParam->m_pPermanentBuffer = new BYTE[pFindFileParam->m_u8PermanentSize];
 				LPBYTE pBody = (LPBYTE)pAttributeTmp + pAttributeTmp->GetHeaderSize();
@@ -1360,7 +1364,7 @@ int CHXNTFSPartition::ParseMFTListBodyOnlyData(UINT64 u64MFTSerialNumber, LPHXFi
 	return 0;
 }
 
-int CHXNTFSPartition::FindDirectory(LPHXReadDirectory pDir, UINT64 u64MFTLocation, VecFileInfo & listFileIno)
+int CHXNTFSPartition::FindDirectory(LPHXReadDirectory pDir, UINT64 u64MFTLocation, VecFileInfo& listFileIno)
 {
 	DWORD i32Error = 0;
 	DWORD u32RealReadSize = 0;
@@ -1372,12 +1376,12 @@ int CHXNTFSPartition::FindDirectory(LPHXReadDirectory pDir, UINT64 u64MFTLocatio
 	}
 
 
-	QString wstrDirectory = pDir->m_wstrDirectory;
-	int i32Disk = wstrDirectory.indexOf(L"\\", 0);
-	//	²âÊÔÓÃÀıa:\\b\\  a:\\c
+	std::wstring wstrDirectory = pDir->m_wstrDirectory;
+	int i32Disk = wstrDirectory.find(L"\\", 0);
+	//	æµ‹è¯•ç”¨ä¾‹a:\\b\\  a:\\c
 	if (i32Disk != (wstrDirectory.length() - 1))
 	{
-		wstrDirectory += u8"\\";
+		wstrDirectory += L"\\";
 	}
 	ParseDirectoryMFT(pFileRecord, wstrDirectory, listFileIno);
 
@@ -1405,8 +1409,14 @@ int CHXNTFSPartition::ParseBitMap(LPHXAttribute pAttribute, BitMapType& listBitM
 int CHXNTFSPartition::ParseIndex(LPHXIndexParam pIndexParam)
 {
 	INT32 i32Index = 0;
+
+#ifdef _HX_USE_QT_
 	UINT32 u32FIle = pIndexParam->m_strDir.lastIndexOf(u8'\\') + 1;
-	QString wstrFileName = pIndexParam->m_strDir.mid(u32FIle, pIndexParam->m_strDir.length() - 1);
+	std::wstring wstrFileName = pIndexParam->m_strDir.mid(u32FIle, pIndexParam->m_strDir.length() - 1);
+#else
+	UINT32 u32FIle = pIndexParam->m_strDir.rfind(u8'\\') + 1;
+	std::wstring wstrFileName = pIndexParam->m_strDir.substr(u32FIle, pIndexParam->m_strDir.length() - 1);
+#endif // _HX_USE_QT_
 	while (pIndexParam->m_pIndex && pIndexParam->m_pIndex->m_i64MFT != 0L && (-1 == pIndexParam->m_i32AllSize || pIndexParam->m_i32ReadSize < pIndexParam->m_i32AllSize))
 	{
 		INT64 i64MFTSerialNumber = pIndexParam->m_pIndex->m_i64MFT & 0x0000FFFFFFFFFFFF;
@@ -1452,11 +1462,11 @@ int CHXNTFSPartition::ParseIndex(LPHXIndexParam pIndexParam)
 			if (HX_DIRECTORYFLAG & pFileInfo->m_i32FileAttributes)
 			{
 				HaveSubFile(i64MFTSerialNumber, pFileInfo);
-				QString strDirecotry;
+				std::wstring strDirecotry;
 				strDirecotry = pIndexParam->m_strDir;
-				if (strDirecotry.lastIndexOf(u8"\\") != (strDirecotry.size() - 1))
+				if (strDirecotry.rfind(L"\\") != (strDirecotry.size() - 1))
 				{
-					strDirecotry += u8"\\";
+					strDirecotry += L"\\";
 				}
 				strDirecotry += pFileInfo->m_szFileName;
 				SetDirectoryMFT(strDirecotry, i64MFTSerialNumber);
@@ -1481,7 +1491,7 @@ int CHXNTFSPartition::ParseIndex(LPHXIndexParam pIndexParam)
 	}
 	return 1;
 }
-int CHXNTFSPartition::ParseData(LPHXAttribute pAttribute, LCNType & listLCN)
+int CHXNTFSPartition::ParseData(LPHXAttribute pAttribute, LCNType& listLCN)
 {
 	int i32OffsetAll = 0;
 	LPBYTE pDataRun = (LPBYTE)pAttribute + pAttribute->GetHeaderSize();
@@ -1490,7 +1500,7 @@ int CHXNTFSPartition::ParseData(LPHXAttribute pAttribute, LCNType & listLCN)
 		int i32Offset = GetLCN(pDataRun, listLCN);
 		if (-1 == i32Offset)
 		{
-			//	¶ÁÈ¡´íÎó
+			//	è¯»å–é”™è¯¯
 			break;
 		}
 		pDataRun += i32Offset;
@@ -1500,12 +1510,12 @@ int CHXNTFSPartition::ParseData(LPHXAttribute pAttribute, LCNType & listLCN)
 	return 0;
 }
 
-int CHXNTFSPartition::ParseDataRun(LPHXIndexParam pIndexParam, const LCNType & listLCN, const BitMapType & listBitMap)
+int CHXNTFSPartition::ParseDataRun(LPHXIndexParam pIndexParam, const LCNType& listLCN, const BitMapType& listBitMap)
 {
 	int i32hxNumber = 0;
 	LPBYTE pDataRunBuffer = nullptr;
 	INT64 i64Offset = 0;
-	//	¶¨Î»µ½Êı¾İÔËĞĞ TODO:Èç¹ûÒ»ÌõDataRun¹ı´ó  readbuffer»á³¬´ó
+	//	å®šä½åˆ°æ•°æ®è¿è¡Œ TODO:å¦‚æœä¸€æ¡DataRunè¿‡å¤§  readbufferä¼šè¶…å¤§
 	for (auto iter = listLCN.begin(); iter != listLCN.end(); iter++)
 	{
 		LARGE_INTEGER i64FirstDataRunPointer;
@@ -1541,14 +1551,14 @@ int CHXNTFSPartition::ParseDataRun(LPHXIndexParam pIndexParam, const LCNType & l
 					pIndexHeader = (LPHXIndexHeader)((LPBYTE)pIndexHeader + GetClusterSize());
 				}
 				m_pCache->FreeBuffer(pDataRunBuffer);
-				if (i32RemainSize<=0)
+				if (i32RemainSize <= 0)
 				{
 					break;
 				}
 				i64FirstDataRunPointer.QuadPart = i64FirstDataRunPointer.QuadPart + i32RealReadSize;
 				i32RealReadSize = 0;
 				pDataRunBuffer = ReadBuffer(i64FirstDataRunPointer, i32RemainSize, i32RealReadSize, FILE_BEGIN, CHXBufferType_INDEX);
-				Q_ASSERT(nullptr!= pDataRunBuffer);
+				Q_ASSERT(nullptr != pDataRunBuffer);
 				pIndexHeader = (LPHXIndexHeader)pDataRunBuffer;
 				if (i32RemainSize < i32RealReadSize)
 				{
@@ -1559,7 +1569,7 @@ int CHXNTFSPartition::ParseDataRun(LPHXIndexParam pIndexParam, const LCNType & l
 				{
 					i32RemainSize = i32RemainSize - i32RealReadSize;
 				}
-				Q_ASSERT_X(pDataRunBuffer!=nullptr, "error", "ParseDataRun is null!");
+				Q_ASSERT_X(pDataRunBuffer != nullptr, "error", "ParseDataRun is null!");
 			}
 		}
 		else
@@ -1585,13 +1595,13 @@ int CHXNTFSPartition::ParseDataRun(LPHXIndexParam pIndexParam, const LCNType & l
 	return 0;
 }
 
-int CHXNTFSPartition::ParseIndexRoot(LPHXAttribute pAttribute, QString strDir, VecFileInfo& vecFileInfo)
+int CHXNTFSPartition::ParseIndexRoot(LPHXAttribute pAttribute, std::wstring strDir, VecFileInfo& vecFileInfo)
 {
 	int i32OffsetAll = 0;
 	LPHXFileRecordIndexRoot pIndexRoot = (LPHXFileRecordIndexRoot)((LPBYTE)pAttribute + pAttribute->GetHeaderSize());
 	LPHXFileRecordIndexHeader pIndexHeader = (LPHXFileRecordIndexHeader)((LPBYTE)pIndexRoot + sizeof(CHXFileRecordIndexRoot));
 
-	
+
 	CHXIndexParam indexParam;
 	indexParam.m_bFindFile = FALSE;
 	indexParam.m_pIndex = (LPHXIndex)((LPBYTE)pIndexHeader + pIndexHeader->m_i32FirstIndexOffset);
@@ -1614,7 +1624,7 @@ int CHXNTFSPartition::ParseIndexRoot(LPHXAttribute pAttribute, QString strDir, V
 	}
 }
 
-int CHXNTFSPartition::ParseIndexRootForFind(LPHXAttribute pAttribute, QString strDir, UINT64& u64MFTNumber)
+int CHXNTFSPartition::ParseIndexRootForFind(LPHXAttribute pAttribute, std::wstring strDir, UINT64& u64MFTNumber)
 {
 	u64MFTNumber = -1;
 	LPHXFileRecordIndexRoot pIndexRoot = (LPHXFileRecordIndexRoot)((LPBYTE)pAttribute + pAttribute->GetHeaderSize());
@@ -1626,7 +1636,7 @@ int CHXNTFSPartition::ParseIndexRootForFind(LPHXAttribute pAttribute, QString st
 
 	LPHXIndex pIndex = (LPHXIndex)((LPBYTE)pIndexHeader + pIndexHeader->m_i32FirstIndexOffset);
 	INT32	i32ReadSize = pAttribute->GetHeaderSize();
-	
+
 	CHXIndexParam indexParam;
 	indexParam.m_bFindFile = TRUE;
 	indexParam.m_pIndex = pIndex;
@@ -1643,14 +1653,14 @@ int CHXNTFSPartition::ParseIndexRootForFind(LPHXAttribute pAttribute, QString st
 	return 0;
 }
 
-int CHXNTFSPartition::FindFile(UINT64 i64DirectoryMFTNumber, LPHXReadFileInfo pInfo, UINT64 & u64MFTNumber)
+int CHXNTFSPartition::FindFile(UINT64 i64DirectoryMFTNumber, LPHXReadFileInfo pInfo, UINT64& u64MFTNumber)
 {
 	LPHXFileRecordHeader pDir = GetSerialNumberFileRecord(i64DirectoryMFTNumber);
 
-	// ÒÑ¾­»ñÈ¡Ä¿Â¼Ë÷Òı²éÕÒÊ±Ö»Ğè´«µİÎÄ¼şÃû
-	QString wstrFileName = pInfo->m_wstrDirectory;
-	size_t pos = wstrFileName.lastIndexOf(L'\\') + 1;
-	wstrFileName = wstrFileName.mid(pos, wstrFileName.length() - pos);
+	// å·²ç»è·å–ç›®å½•ç´¢å¼•æŸ¥æ‰¾æ—¶åªéœ€ä¼ é€’æ–‡ä»¶å
+	std::wstring wstrFileName = pInfo->m_wstrDirectory;
+	size_t pos = wstrFileName.find(L'\\') + 1;
+	wstrFileName = wstrFileName.substr(pos, wstrFileName.length() - pos);
 	int iRes = ParseDirectoryMFTAttributeForFind(pDir, pInfo->m_wstrDirectory, wstrFileName, u64MFTNumber);
 
 	m_pCache->FreeBuffer((LPBYTE)pDir);
@@ -1661,9 +1671,9 @@ int CHXNTFSPartition::ReadFile(LPHXReadFileInfo pInfo)
 {
 	pInfo->m_u64RealReadSize = 0;
 
-	QString strFile = pInfo->m_wstrDirectory;
-	int i32NPos = strFile.lastIndexOf(L'\\');
-	strFile = strFile.mid(0, i32NPos);
+	std::wstring strFile = pInfo->m_wstrDirectory;
+	int i32NPos = strFile.rfind(L'\\');
+	strFile = strFile.substr(0, i32NPos);
 
 	UINT64 i64MFTLocation;
 	if (0 == GetDirectoryMFT(strFile, i64MFTLocation))
@@ -1679,7 +1689,7 @@ int CHXNTFSPartition::ReadFile(LPHXReadFileInfo pInfo)
 		}
 	}
 
-	//	ÕÒÄ¿Â¼ÖĞÎÄ¼şµÄIndex µÃµ½MFTĞòºÅ
+	//	æ‰¾ç›®å½•ä¸­æ–‡ä»¶çš„Index å¾—åˆ°MFTåºå·
 	UINT64 i64MFTNumber = -1L;
 	FindFile(i64MFTLocation, pInfo, i64MFTNumber);
 	if (-1 == i64MFTNumber)
@@ -1690,19 +1700,19 @@ int CHXNTFSPartition::ReadFile(LPHXReadFileInfo pInfo)
 	i64MFTNumber = i64MFTNumber & 0x0000FFFFFFFFFFFF;
 	LPHXFileRecordHeader pFileRecordHeader = GetSerialNumberFileRecord(i64MFTNumber);
 	Q_ASSERT_X(nullptr != pFileRecordHeader, "Error", "Get MFT Error!");
-	//	»ñÈ¡80HµÄÊı¾İÔËĞĞ
+	//	è·å–80Hçš„æ•°æ®è¿è¡Œ
 	//UINT32 u16CompressFlage;
 	CHXFindFileParam param;
 	ParseMFTAttributeOnlyData(pFileRecordHeader, &param);
-	
+
 	int i32Result = ReadFileData(&param, pInfo);
-	Q_ASSERT(-1!= i32Result);
+	Q_ASSERT(-1 != i32Result);
 
 	m_pCache->FreeBuffer((LPBYTE)pFileRecordHeader);
 	return i32Result;
 }
 
-int CHXNTFSPartition::ReadFileData( LPHXFindFileParam pParam, LPHXReadFileInfo pInfo)
+int CHXNTFSPartition::ReadFileData(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo)
 {
 	int i32Result = 0;
 	switch (pParam->m_u16CompressFlage)
@@ -1710,21 +1720,21 @@ int CHXNTFSPartition::ReadFileData( LPHXFindFileParam pParam, LPHXReadFileInfo p
 	case HXCompressFlag_Unkown:
 		i32Result = ReadFileDataBase(pParam, pInfo);
 		break;
-		//	ÒÔÏÂÔİÊ±²»Ö§³Ö
+		//	ä»¥ä¸‹æš‚æ—¶ä¸æ”¯æŒ
 	case HXCompressFlag_Compression:
 	case HXCompressFlag_Encryption:
 	case HXCompressFlag_SparseFile:
 		i32Result = 3;
 		break;
-	//case HXCompressFlag_Compression:
-	//	i32Result = ReadFileDataCompression(pParam, pInfo);
-	//	break;
-	//case HXCompressFlag_Encryption:
-	//	i32Result = ReadFileDataEncryption( pParam, pInfo);
-	//	break;
-	//case HXCompressFlag_SparseFile:
-	//	i32Result = ReadFileDataSparseFile(pParam, pInfo);
-	//	break;
+		//case HXCompressFlag_Compression:
+		//	i32Result = ReadFileDataCompression(pParam, pInfo);
+		//	break;
+		//case HXCompressFlag_Encryption:
+		//	i32Result = ReadFileDataEncryption( pParam, pInfo);
+		//	break;
+		//case HXCompressFlag_SparseFile:
+		//	i32Result = ReadFileDataSparseFile(pParam, pInfo);
+		//	break;
 	default:
 		i32Result = 3;
 		break;
@@ -1735,6 +1745,7 @@ int CHXNTFSPartition::ReadFileData( LPHXFindFileParam pParam, LPHXReadFileInfo p
 UINT64 CHXNTFSPartition::GetLCNSize(LCNType vecLCN, int i32Index, UINT64 u64LastClusterValueSize, bool bIsLastLCN)
 {
 	UINT64 u64Size = 0;
+#ifdef _HX_USE_QT_
 	if ((i32Index < vecLCN.length() - 1) || (false == bIsLastLCN))
 	{
 		u64Size = vecLCN[i32Index].second * GetClusterSize();
@@ -1743,6 +1754,16 @@ UINT64 CHXNTFSPartition::GetLCNSize(LCNType vecLCN, int i32Index, UINT64 u64Last
 	{
 		u64Size = vecLCN[i32Index].second * GetClusterSize() - u64LastClusterValueSize;
 	}
+#else
+	if ((i32Index < vecLCN.size() - 1) || (false == bIsLastLCN))
+	{
+		u64Size = vecLCN[i32Index].second * GetClusterSize();
+	}
+	else if (i32Index == vecLCN.size() - 1)
+	{
+		u64Size = vecLCN[i32Index].second * GetClusterSize() - u64LastClusterValueSize;
+	}
+#endif // _HX_USE_QT_
 	return u64Size;
 }
 
@@ -1761,20 +1782,21 @@ int CHXNTFSPartition::ReadFileDataBase(LPHXFindFileParam pParam, LPHXReadFileInf
 	{
 		LPBYTE pDataRunBuffer = nullptr;
 		UINT64 u64ReadStart = pInfo->m_u64CurPos;
-		//	ÄÜ¹»¶ÁÈ¡µÄ×î´ó´óĞ¡
+		//	èƒ½å¤Ÿè¯»å–çš„æœ€å¤§å¤§å°
 		UINT64 u64ReadSize = pInfo->m_u64ReadSize;
 		if (0 != u64ReadSize % m_pCache->GetBPB()->m_i16SectorSize)
 		{
-			qCritical() << "ReadFileDataBase Failed";
+			assert(0);
+			//qCritical() << "ReadFileDataBase Failed";
 			return -1;
 		}
-		//×îºóÒ»¸ö´ØÎŞĞ§´óĞ¡
+		//æœ€åä¸€ä¸ªç°‡æ— æ•ˆå¤§å°
 		UINT64 u64LastClusterValueSize = pParam->m_u64SpaceSize - pParam->m_u64RealSize;
 		BOOL bContinueRead = FALSE;
 		bool bLastVCN = false;
-		//	ÔÚ´ËÎÄ¼şÖĞÕû¸öµÄÆ«ÒÆ
+		//	åœ¨æ­¤æ–‡ä»¶ä¸­æ•´ä¸ªçš„åç§»
 		//UINT64 u64VCNOffset = 0;
-		// Ò»¸ö80ÊôĞÔÒ»¸öVCN
+		// ä¸€ä¸ª80å±æ€§ä¸€ä¸ªVCN
 		for (auto iterVCN = pParam->m_vecVCN.begin(); iterVCN != pParam->m_vecVCN.end(); iterVCN++)
 		{
 			UINT64 u64VCNSize = (iterVCN->m_u64EndCluster - iterVCN->m_u64StartCluster + 1) * GetClusterSize();
@@ -1788,9 +1810,9 @@ int CHXNTFSPartition::ReadFileDataBase(LPHXFindFileParam pParam, LPHXReadFileInf
 				u64ReadStart = u64ReadStart - u64VCNSize;
 				continue;
 			}
-			UINT64 u64StartLCN = 0;	//ÎÄ¼ş¶ÁÈ¡ÆğµãÎ»ÖÃ
-			UINT64 u64LCNOffset = 0;//µ±Ç°LCNÆğÊ¼´Ø
-			UINT64 u64LCNSize = 0;	//Ã¿Ò»¸ö80ÊôĞÔÖĞµ¥¶ÀÒ»ÌõLCN´óĞ¡
+			UINT64 u64StartLCN = 0;	//æ–‡ä»¶è¯»å–èµ·ç‚¹ä½ç½®
+			UINT64 u64LCNOffset = 0;//å½“å‰LCNèµ·å§‹ç°‡
+			UINT64 u64LCNSize = 0;	//æ¯ä¸€ä¸ª80å±æ€§ä¸­å•ç‹¬ä¸€æ¡LCNå¤§å°
 			for (u64StartLCN = 0; u64StartLCN != iterVCN->m_vecLCN.size(); u64StartLCN++)
 			{
 				u64LCNSize = GetLCNSize(iterVCN->m_vecLCN, u64StartLCN, u64LastClusterValueSize, bLastVCN);
@@ -1811,15 +1833,15 @@ int CHXNTFSPartition::ReadFileDataBase(LPHXFindFileParam pParam, LPHXReadFileInf
 				continue;
 			}
 
-			//	¶ÁÎÄ¼şÆğÊ¼µã
+			//	è¯»æ–‡ä»¶èµ·å§‹ç‚¹
 			LARGE_INTEGER i64FilePos;
 			i64FilePos.QuadPart = u64LCNOffset * GetClusterSize() + u64ReadStart;
 
-			//	ÓĞĞ§¶ÁÈ¡´óĞ¡
-			UINT32 u32ReadSize = min(u64ReadSize, u64LCNSize- u64ReadStart);
+			//	æœ‰æ•ˆè¯»å–å¤§å°
+			UINT32 u32ReadSize = min(u64ReadSize, u64LCNSize - u64ReadStart);
 			//u64ReadSize -= u32ReadSize;
 			DWORD u32ReadlReadSize = 0;
-			//	Ğ£Ñé¶ÁÈ¡´óĞ¡
+			//	æ ¡éªŒè¯»å–å¤§å°
 			LPBYTE pBuffer = ReadBuffer(i64FilePos, u32ReadSize, u32ReadlReadSize, FILE_BEGIN, CHXBufferType_Unknown);
 			int i32ReadCopySize = min(u32ReadSize, u32ReadlReadSize);
 
@@ -1837,25 +1859,25 @@ int CHXNTFSPartition::ReadFileDataBase(LPHXFindFileParam pParam, LPHXReadFileInf
 	}
 	return 0;
 }
-int CHXNTFSPartition::ReadFileDataCompression( LPHXFindFileParam pParam, LPHXReadFileInfo pInfo)
+int CHXNTFSPartition::ReadFileDataCompression(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo)
 {
 	return 0;
 }
-int CHXNTFSPartition::ReadFileDataEncryption( LPHXFindFileParam pParam, LPHXReadFileInfo pInfo)
+int CHXNTFSPartition::ReadFileDataEncryption(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo)
 {
 	return 0;
 }
-int CHXNTFSPartition::ReadFileDataSparseFile( LPHXFindFileParam pParam, LPHXReadFileInfo pInfo)
+int CHXNTFSPartition::ReadFileDataSparseFile(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo)
 {
 	return 0;
 }
 
-int CHXNTFSPartition::ParseMFTListBody(	
-	QString strDir,
-	LCNType & listLCN,
-	BitMapType & listBitMap,
+int CHXNTFSPartition::ParseMFTListBody(
+	std::wstring strDir,
+	LCNType& listLCN,
+	BitMapType& listBitMap,
 	UINT64 u64MFTSerialNumber,
-	LPHXAttribute & pAttributeIndexRoot,
+	LPHXAttribute& pAttributeIndexRoot,
 	SetMFTNumber& setAlreadyParseMFT)
 {
 	LPHXFileRecordHeader pMFT = GetSerialNumberFileRecord(u64MFTSerialNumber);
@@ -1866,7 +1888,7 @@ int CHXNTFSPartition::ParseMFTListBody(
 
 	INT32 i32HasReadByte = pMFT->m_i16FirstAttribute;
 
-	//	»ñÈ¡Ë÷Òı¸ùºÍË÷Òı·ÖÅä				
+	//	è·å–ç´¢å¼•æ ¹å’Œç´¢å¼•åˆ†é…				
 	while (i32HasReadByte < pMFT->m_u32FileRecordRealSize)
 	{
 		LPHXAttribute pAttributeTmp = (LPHXAttribute)((BYTE*)pMFT + i32HasReadByte);
@@ -1881,7 +1903,7 @@ int CHXNTFSPartition::ParseMFTListBody(
 		{
 			pAttributeIndexRoot = (pAttributeIndexRoot == nullptr ? pAttributeTmp : pAttributeIndexRoot);
 		}
-		//	½âÎöAOHÊôĞÔ
+		//	è§£æAOHå±æ€§
 		else if (HXAttribute_IndexAllocation == pAttributeTmp->m_i32Flag)
 		{
 			if (-1 == ParseIndexAlloc(pAttributeTmp, listLCN))
@@ -1889,7 +1911,7 @@ int CHXNTFSPartition::ParseMFTListBody(
 				return -1;
 			}
 		}
-		//	½âÎöBOHÊôĞÔ
+		//	è§£æBOHå±æ€§
 		else if (HXAttribute_Bitmap == pAttributeTmp->m_i32Flag)
 		{
 			if (-1 == ParseBitMap(pAttributeTmp, listBitMap))

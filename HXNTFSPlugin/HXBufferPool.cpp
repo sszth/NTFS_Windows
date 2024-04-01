@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include <QDir> 
-#include <QDebug>
+//#include <QDir> 
+//#include <QDebug>
 #include "HXBufferPool.h"
 
 const static UINT64 g_cs_u64BufferSize = 1024 * 1024;
@@ -36,9 +36,9 @@ void CHXBufferPool::Initialization()
 		pBuffer->InitLock(m_u64BufferSize);
 		m_listBufferPool.push_back(pBuffer);
 	}
-	qInfo() << "BufferPool Max Size:" << QString::number(m_u64BufferNumber*m_u64BufferSize);
-	qInfo() << "BufferPool Number:" << QString::number(m_u64BufferNumber);
-	qInfo() << "BufferPool Page Size:" << QString::number(m_u64BufferSize);
+	//qInfo() << "BufferPool Max Size:" << std::wstring::number(m_u64BufferNumber*m_u64BufferSize);
+	//qInfo() << "BufferPool Number:" << std::wstring::number(m_u64BufferNumber);
+	//qInfo() << "BufferPool Page Size:" << std::wstring::number(m_u64BufferSize);
 	m_u32Current = 0;
 	m_u64PoolLength = 0;
 	//m_bValid = true;
@@ -55,9 +55,15 @@ void CHXBufferPool::Clear()
 
 LPBYTE CHXBufferPool::GetPoolBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD & i32Readsize)
 {
+#ifdef _HX_USE_QT_
 	QReadLocker locker(&m_lock);
+#else
+	std::shared_lock<std::shared_mutex> lck(m_lock);
+#endif // _HX_USE_QT_
+	
 	LPBYTE pBuffer = nullptr;
 
+#ifdef _HX_USE_QT_
 	for (size_t i = 0; i < m_listBufferPool.length(); i++)
 	{
 		pBuffer = m_listBufferPool[i]->GetBufferLock(i64FilePointer, i32FileRecordSize, i32Readsize);
@@ -67,12 +73,22 @@ LPBYTE CHXBufferPool::GetPoolBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileR
 			break;
 		}
 	}
+#else
+	std::for_each(m_listBufferPool.begin(), m_listBufferPool.end(), [i64FilePointer, i32FileRecordSize, &i32Readsize, &pBuffer](CHXBufferDataPtr pListBuffer) {
+		pBuffer = pListBuffer->GetBufferLock(i64FilePointer, i32FileRecordSize, i32Readsize);
+		if (nullptr != pBuffer){
+			pListBuffer->m_ThreaID = GetCurrentThreadId();
+			return;
+		}
+	});
+#endif // _HX_USE_QT_
 	return pBuffer;
 }
 
 CHXBufferDataPtr CHXBufferPool::GetBuffer()
 {
-	QReadLocker locker(&m_lock);
+	std::shared_lock<std::shared_mutex> lck(m_lock);
+	//QReadLocker locker(&m_lock);
 	CHXBufferDataPtr pBuffer = nullptr;
 	UINT u32Index = m_u32Current;
 	for (size_t i = 0; 1; i++)
@@ -119,6 +135,7 @@ UINT32 CHXBufferPool::RemainSize()
 
 void CHXBufferPool::FreeBuffer(LPBYTE pBuffer)
 {
+#ifdef _HX_USE_QT_
 	for (size_t i = 0; i < m_listBufferPool.length(); i++)
 	{
 		if (m_listBufferPool[i]->FreeBufferLock(pBuffer))
@@ -126,6 +143,13 @@ void CHXBufferPool::FreeBuffer(LPBYTE pBuffer)
 			break;
 		}
 	}
+#else
+	std::for_each(m_listBufferPool.begin(), m_listBufferPool.end(), [pBuffer](CHXBufferDataPtr pListBuffer) {
+		if (pListBuffer->FreeBufferLock(pBuffer)){
+			return;
+		}
+		});
+#endif // _HX_USE_QT_
 }
 
 //void CHXBufferPool::FreeUsed(CHXBufferDataPtr pBuffer)
@@ -140,9 +164,15 @@ void CHXBufferPool::FreeBuffer(LPBYTE pBuffer)
 
 void CHXBufferPool::SetValid(bool bValid)
 {
+#ifdef _HX_USE_QT_
 	for (size_t i = 0; i < m_listBufferPool.length(); i++)
 	{
 		m_listBufferPool[i]->ResetLock();
 	}
+#else
+	std::for_each(m_listBufferPool.begin(), m_listBufferPool.end(), [](CHXBufferDataPtr pBuffer) {
+		pBuffer->ResetLock();
+		});
+#endif // _HX_USE_QT_
 	//m_bValid = bValid;
 }

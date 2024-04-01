@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "HXNTFSType.h"
 //#include "HXBufferPool.h"
@@ -7,7 +7,7 @@
 class CHXNTFSPartition
 {
 public:
-	CHXNTFSPartition(const QString & strPartitionName) 
+	CHXNTFSPartition(const std::wstring& strPartitionName)
 		: m_strPartitionName(strPartitionName)
 		, m_pCache(HXNTFSCachePtr(new HXNTFSCache))
 	{}
@@ -22,161 +22,161 @@ public:
 	void Clear();
 
 public:
-	const QString & GetPartitionName();
+	const std::wstring& GetPartitionName();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½ÓÊÜOnCmdÖĞ²éÕÒÃüÁî
-	 *	pDir		ĞèÒª²éÕÒµÄÄ¿Â¼
-	 *	listFileIno	²éÕÒ½á¹û
+	 *  å‡½æ•°æè¿°:
+	 *				æ¥å—OnCmdä¸­æŸ¥æ‰¾å‘½ä»¤
+	 *	pDir		éœ€è¦æŸ¥æ‰¾çš„ç›®å½•
+	 *	listFileIno	æŸ¥æ‰¾ç»“æœ
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
-	int FindDirectory(LPHXReadDirectory pDirectory, VecFileInfo & listFileIno);
+	int FindDirectory(LPHXReadDirectory pDirectory, VecFileInfo& listFileIno);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-					´ÅÅÌ¸ùÄ¿Â¼ÇÒµÚÒ»´Î¶ÁÈ¡
-	 *	pDir		ĞèÒª²éÕÒµÄÄ¿Â¼¡¢Ò³ºÅ¡¢Ã¿Ò³´óĞ¡
-	 *	listFileIno	²éÕÒ½á¹û
+	 *  å‡½æ•°æè¿°:
+					ç£ç›˜æ ¹ç›®å½•ä¸”ç¬¬ä¸€æ¬¡è¯»å–
+	 *	pDir		éœ€è¦æŸ¥æ‰¾çš„ç›®å½•ã€é¡µå·ã€æ¯é¡µå¤§å°
+	 *	listFileIno	æŸ¥æ‰¾ç»“æœ
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
-	int		ParseRootDirectoryMFT(LPHXReadDirectory pDir, VecFileInfo & listFileIno);
+	int		ParseRootDirectoryMFT(LPHXReadDirectory pDir, VecFileInfo& listFileIno);
 
 
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				´æ´¢×ÓÄ¿Â¼Î»ÖÃ
+	 *  å‡½æ•°æè¿°:
+	 *				å­˜å‚¨å­ç›®å½•ä½ç½®
 	 */
-	int GetDirectoryMFT(const QString & strDir, UINT64 & u64MFTPoint);
-	int SetDirectoryMFT(const QString & strDir, UINT64 u64MFTPoint);
+	int GetDirectoryMFT(const std::wstring& strDir, UINT64& u64MFTPoint);
+	int SetDirectoryMFT(const std::wstring& strDir, UINT64 u64MFTPoint);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎö$MFTÊôĞÔ
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æ$MFTå±æ€§
 	 *
 	 */
-	int		ParseFileRecordMFT(LCNType & vecLCN);
-		
+	int		ParseFileRecordMFT(LCNType& vecLCN);
+
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡Ö¸¶¨Î»ÖÃµÄbuffer
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–æŒ‡å®šä½ç½®çš„buffer
 	 */
-	LPBYTE		ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD & i32Readsize, DWORD i32MoveMethod, CHXBufferType i32Type);
+	LPBYTE		ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD& i32Readsize, DWORD i32MoveMethod, CHXBufferType i32Type);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				´¦ÀíÖ¸¶¨³¤¶È20ÊôĞÔÌåĞÅÏ¢
+	 *  å‡½æ•°æè¿°:
+	 *				å¤„ç†æŒ‡å®šé•¿åº¦20å±æ€§ä½“ä¿¡æ¯
 	 */
-	int ParseMFTListBody(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, QString strDir, LCNType & listLCN, BitMapType & listBitMap, LPHXAttribute & pAttributeIndexRoot, SetMFTNumber & setAlreadyParseMFT);
-//	int ParseMFTListBody(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, QString strDir, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber & setAlreadyParseMFT);
-	
-	int ParseMFTListPermanent(LPHXAttribute pAttribute, QString strDir, LCNType & listLCN, BitMapType & listBitMap, LPHXAttribute & pAttributeIndexRoot, SetMFTNumber& setAlreadyParseMFT);
-//	int ParseMFTListPermanent(LPHXAttribute pAttribute, QString strDir, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber& setAlreadyParseMFT);
-	int ParseMFTListVariable(LPHXAttribute pAttribute, QString strDir, LCNType & listLCN, BitMapType & listBitMap, LPHXAttribute & pAttributeIndexRoot, SetMFTNumber & setAlreadyParseMFT);
-//	int ParseMFTListVariable(LPHXAttribute pAttribute, QString strDir, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber & setAlreadyParseMFT);
+	int ParseMFTListBody(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, std::wstring strDir, LCNType& listLCN, BitMapType& listBitMap, LPHXAttribute& pAttributeIndexRoot, SetMFTNumber& setAlreadyParseMFT);
+	//	int ParseMFTListBody(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, std::wstring strDir, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber & setAlreadyParseMFT);
 
-	
-	int ParseMFTList(LPHXAttribute pAttribute, QString strDir, LCNType & listLCN, BitMapType & listBitMap, LPHXAttribute & pAttributeIndexRoot, SetMFTNumber & setAlreadyParseMFT);
-//	int ParseMFTList(LPHXAttribute pAttribute, QString strDir, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber & setAlreadyParseMFT);
-	
+	int ParseMFTListPermanent(LPHXAttribute pAttribute, std::wstring strDir, LCNType& listLCN, BitMapType& listBitMap, LPHXAttribute& pAttributeIndexRoot, SetMFTNumber& setAlreadyParseMFT);
+	//	int ParseMFTListPermanent(LPHXAttribute pAttribute, std::wstring strDir, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber& setAlreadyParseMFT);
+	int ParseMFTListVariable(LPHXAttribute pAttribute, std::wstring strDir, LCNType& listLCN, BitMapType& listBitMap, LPHXAttribute& pAttributeIndexRoot, SetMFTNumber& setAlreadyParseMFT);
+	//	int ParseMFTListVariable(LPHXAttribute pAttribute, std::wstring strDir, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber & setAlreadyParseMFT);
 
-	/**
-	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöÊôĞÔÁĞ±í(20H),Ö»»ñÈ¡80H¡£´ËÁ÷³ÌÖ»Ìá¹©ÓÚ½âÎö$MFTµÄLCNÁ÷³Ì
-	 *
-	 */
+
+	int ParseMFTList(LPHXAttribute pAttribute, std::wstring strDir, LCNType& listLCN, BitMapType& listBitMap, LPHXAttribute& pAttributeIndexRoot, SetMFTNumber& setAlreadyParseMFT);
+	//	int ParseMFTList(LPHXAttribute pAttribute, std::wstring strDir, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber & setAlreadyParseMFT);
+
+
+		/**
+		 *
+		 *  å‡½æ•°æè¿°:
+		 *				è§£æå±æ€§åˆ—è¡¨(20H),åªè·å–80Hã€‚æ­¤æµç¨‹åªæä¾›äºè§£æ$MFTçš„LCNæµç¨‹
+		 *
+		 */
 	int		ParseMFTListOnlyData(LPHXAttribute pAttribute, LCNType& vecLCN, SetMFTNumber& setAlreadyParseMFT);
-	int		ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType & vecLCN, SetMFTNumber & setAlreadyParseMFT);
+	int		ParseMFTListBodyOnlyData(UINT u64MFTSerialNumber, LCNType& vecLCN, SetMFTNumber& setAlreadyParseMFT);
 
-	int ParseMFTListBodyOnlyData(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, LPHXFindFileParam pFindFileParam, SetMFTNumber & setAlreadyParseMFT);
+	int ParseMFTListBodyOnlyData(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, LPHXFindFileParam pFindFileParam, SetMFTNumber& setAlreadyParseMFT);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöÊôĞÔÁĞ±í(20H),Ö»»ñÈ¡80H¡£´ËÁ÷³ÌÖ»Ìá¹©ÓÚÎÄ¼şÊôĞÔ´óĞ¡Á÷³Ì
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æå±æ€§åˆ—è¡¨(20H),åªè·å–80Hã€‚æ­¤æµç¨‹åªæä¾›äºæ–‡ä»¶å±æ€§å¤§å°æµç¨‹
 	 *
 	 */
 	int		ParseMFTListOnlyData(LPHXAttribute pAttribute, LPHXFindFileParam pFindFileParam, SetMFTNumber& setAlreadyParseMFT);
-	int ParseMFTListBodyOnlyData(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, LCNType & vecLCN, SetMFTNumber & setAlreadyParseMFT);
-	int		ParseMFTListBodyOnlyData(UINT64 u64MFTSerialNumber, LPHXFindFileParam pFindFileParam, SetMFTNumber & setAlreadyParseMFT);
+	int ParseMFTListBodyOnlyData(LPHXFileRecordListBody pListBody, UINT64 u64AllSize, LCNType& vecLCN, SetMFTNumber& setAlreadyParseMFT);
+	int		ParseMFTListBodyOnlyData(UINT64 u64MFTSerialNumber, LPHXFindFileParam pFindFileParam, SetMFTNumber& setAlreadyParseMFT);
 
 
-	int		ParseMFTListBody(QString strDir, LCNType & listLCN, BitMapType & listBitMap, UINT64 u64MFTSerialNumber, LPHXAttribute & pAttributeIndexRoot, SetMFTNumber& mapAlreadyFind);
+	int		ParseMFTListBody(std::wstring strDir, LCNType& listLCN, BitMapType& listBitMap, UINT64 u64MFTSerialNumber, LPHXAttribute& pAttributeIndexRoot, SetMFTNumber& mapAlreadyFind);
 
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöÊôĞÔÁĞ±í(20H)
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æå±æ€§åˆ—è¡¨(20H)
 	 *
 	 */
 	int ParsingMFTList(LPHXAttribute pAttribute,
 		HANDLE hDisk,
-		QString strDir,
-		LCNType & listLCN,
-		BitMapType & listBitMap,
-		LPHXAttribute & pAttributeIndexRoot,
-		SetMFTNumber &mapAlreadyFind);
+		std::wstring strDir,
+		LCNType& listLCN,
+		BitMapType& listBitMap,
+		LPHXAttribute& pAttributeIndexRoot,
+		SetMFTNumber& mapAlreadyFind);
 
-	//int ParseMFTListBody(QString strDir, UINT64 u64MFTSerialNumber, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber& setAlreadyParseMFT);
+	//int ParseMFTListBody(std::wstring strDir, UINT64 u64MFTSerialNumber, std::vector<LPHXAttribute>& vecAttribute, SetMFTNumber& setAlreadyParseMFT);
 
 
 	///**
 	// *
-	// *  º¯ÊıÃèÊö:
-	// *				»ñÈ¡µÚ5¸ömft(Root MFT)
+	// *  å‡½æ•°æè¿°:
+	// *				è·å–ç¬¬5ä¸ªmft(Root MFT)
 	// *
 	// */
 	//int		GetRootFileRecord(int i32FileRecordSize, LPBYTE & pBuffer);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				×ÓÄ¿Â¼½âÎöº¯Êı£¬½âÎö×ÓÄ¿Â¼
+	 *  å‡½æ•°æè¿°:
+	 *				å­ç›®å½•è§£æå‡½æ•°ï¼Œè§£æå­ç›®å½•
 	 *
 	 */
-	int		ParseDirectoryMFT(LPHXFileRecordHeader pFileRecord, QString str, VecFileInfo & listFileInfo);
+	int		ParseDirectoryMFT(LPHXFileRecordHeader pFileRecord, std::wstring str, VecFileInfo& listFileInfo);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöMFTÊôĞÔ
-	 *	bFind	ÊÇ·ñ²éÕÒ¡£TRUEÎª²éÕÒ£¬²éÕÒÊ±strDirÎªÎÄ¼ş¾ø¶ÔÂ·¾¶£¬²éÕÒÊ±·µ»ØÖµÊÇMFTĞòºÅ£¬-1´ú±íÎŞĞ§
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æMFTå±æ€§
+	 *	bFind	æ˜¯å¦æŸ¥æ‰¾ã€‚TRUEä¸ºæŸ¥æ‰¾ï¼ŒæŸ¥æ‰¾æ—¶strDirä¸ºæ–‡ä»¶ç»å¯¹è·¯å¾„ï¼ŒæŸ¥æ‰¾æ—¶è¿”å›å€¼æ˜¯MFTåºå·ï¼Œ-1ä»£è¡¨æ— æ•ˆ
 	 *
 	 */
-	int ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecord, QString strDir, VecFileInfo & listFileInfo);
+	int ParseDirectoryMFTAttribute(LPHXFileRecordHeader pFileRecord, std::wstring strDir, VecFileInfo& listFileInfo);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöAOHÊôĞÔ
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æAOHå±æ€§
 	 *
 	 */
-	int		ParseIndexAlloc(LPHXAttribute pAttribute, LCNType & listLCN);
+	int		ParseIndexAlloc(LPHXAttribute pAttribute, LCNType& listLCN);
 
-	int		GetLCN(LPBYTE pData, LCNType & listLCN);
-	int		ParseDirectoryMFTAttributeForFind(LPHXFileRecordHeader pFileRecord, QString strDir, QString strFileName, UINT64 & u64MFTNumber);
-	
+	int		GetLCN(LPBYTE pData, LCNType& listLCN);
+	int		ParseDirectoryMFTAttributeForFind(LPHXFileRecordHeader pFileRecord, std::wstring strDir, std::wstring strFileName, UINT64& u64MFTNumber);
+
 	int		ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord, LCNType& vecLCN);
 	int		ParseMFTAttributeOnlyData(LPHXFileRecordHeader pFileRecord, LPHXFindFileParam pFindFileParam);
 
-	
-	
+
+
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡Ö¸¶¨ĞòºÅmft
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–æŒ‡å®šåºå·mft
 	 */
 	LPHXFileRecordHeader		GetSerialNumberFileRecord(INT64 i64MFTSerialNumber);
 
@@ -184,130 +184,130 @@ public:
 	int HaveSubFile(INT64 i64MFTSerialNumber, LPHXFileInfo pFileInfo);
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡×ÓÄ¿Â¼ÎÄ¼ş¼ÇÂ¼£¬ÔÙµ÷ÓÃ×ÓÄ¿Â¼½âÎöº¯Êı
-	 *	pDir		ĞèÒª²éÕÒµÄÄ¿Â¼
-	 *	listFileIno	²éÕÒ½á¹û
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–å­ç›®å½•æ–‡ä»¶è®°å½•ï¼Œå†è°ƒç”¨å­ç›®å½•è§£æå‡½æ•°
+	 *	pDir		éœ€è¦æŸ¥æ‰¾çš„ç›®å½•
+	 *	listFileIno	æŸ¥æ‰¾ç»“æœ
 	 *
-	 *	@return ·µ»Ø½á¹û
+	 *	@return è¿”å›ç»“æœ
 	 */
-	int		FindDirectory(LPHXReadDirectory pDir, UINT64 u64MFTLocation, VecFileInfo &listFileIno);
+	int		FindDirectory(LPHXReadDirectory pDir, UINT64 u64MFTLocation, VecFileInfo& listFileIno);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöBOHÊôĞÔ
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æBOHå±æ€§
 	 *
 	 */
-	int		ParseBitMap(LPHXAttribute pAttribute, BitMapType & listBitMap);
+	int		ParseBitMap(LPHXAttribute pAttribute, BitMapType& listBitMap);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöË÷ÒıÏî
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æç´¢å¼•é¡¹
 	 *
 	 */
 	int ParseIndex(LPHXIndexParam pIndexParam);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöÊı¾İÔËĞĞ
+	 *  å‡½æ•°æè¿°:
+	 *				è§£ææ•°æ®è¿è¡Œ
 	 *
 	 */
-	int		ParseDataRun(LPHXIndexParam pIndexParam, const LCNType & listLSN, const BitMapType & listBitMap);
+	int		ParseDataRun(LPHXIndexParam pIndexParam, const LCNType& listLSN, const BitMapType& listBitMap);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöData(80H)ÊôĞÔ
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æData(80H)å±æ€§
 	 *
 	 */
-	int		ParseData(LPHXAttribute pAttribute, LCNType & listLCN);
+	int		ParseData(LPHXAttribute pAttribute, LCNType& listLCN);
 
-	int ReadFileData( LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
+	int ReadFileData(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
 
 	UINT64 GetLCNSize(LCNType vecLCN, int i32IndexLCN, UINT64 u64LastClusterValueSize, bool bIsLastLCN);
 
 
 	int ReadFileDataBase(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
 
-	int ReadFileDataCompression( LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
+	int ReadFileDataCompression(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
 
-	int ReadFileDataEncryption( LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
+	int ReadFileDataEncryption(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
 
-	int ReadFileDataSparseFile( LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
+	int ReadFileDataSparseFile(LPHXFindFileParam pParam, LPHXReadFileInfo pInfo);
 
-	
+
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎö90H
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æ90H
 	 *
 	 */
-	int ParseIndexRoot(LPHXAttribute pAttribute, QString strDir, VecFileInfo& vecFileInfo);
+	int ParseIndexRoot(LPHXAttribute pAttribute, std::wstring strDir, VecFileInfo& vecFileInfo);
 
-	int ParseIndexRootForFind(LPHXAttribute pAttribute, QString strDir, UINT64& u64MFTNumber);
+	int ParseIndexRootForFind(LPHXAttribute pAttribute, std::wstring strDir, UINT64& u64MFTNumber);
 
 
-	int FindFile(UINT64 i64DirectoryMFTNumber, LPHXReadFileInfo pInfo, UINT64 & u64MFTNumber);
+	int FindFile(UINT64 i64DirectoryMFTNumber, LPHXReadFileInfo pInfo, UINT64& u64MFTNumber);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				¶ÁÈ¡ÎÄ¼şĞÅÏ¢
+	 *  å‡½æ•°æè¿°:
+	 *				è¯»å–æ–‡ä»¶ä¿¡æ¯
 	 */
 	int ReadFile(LPHXReadFileInfo pInfo);
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				½âÎöMFTÎÄ¼şÃû³ÆÊôĞÔ£¬»ñÈ¡ÎÄ¼şÃû³Æ¡¢´óĞ¡¡¢´´½¨ĞŞ¸ÄÊ±¼ä
+	 *  å‡½æ•°æè¿°:
+	 *				è§£æMFTæ–‡ä»¶åç§°å±æ€§ï¼Œè·å–æ–‡ä»¶åç§°ã€å¤§å°ã€åˆ›å»ºä¿®æ”¹æ—¶é—´
 	 */
 	int		GetMFTBaseInfo(INT64 i64MFTSerialNumber, LPHXFileInfo pFileInfo);
 
-	void	GetIndexName(LPHXIndex pIndex, QString & strFileName);
+	void	GetIndexName(LPHXIndex pIndex, std::wstring& strFileName);
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡$MFT
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–$MFT
 	 */
 	LPHXFileRecordHeader		GetFileRecordHeaderMFT();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡µÚ5¸ömft(Root MFT)
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–ç¬¬5ä¸ªmft(Root MFT)
 	 *
 	 */
 	LPHXFileRecordHeader GetRootFileRecord();
 
 	void Refresh();
 public:
-	   	  
+
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡Ã¿¸öMFT´óĞ¡
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–æ¯ä¸ªMFTå¤§å°
 	 */
 	UINT32	GetMFTSize();
 	UINT32	GetBufferSize();
 
 	/**
 	 *
-	 *  º¯ÊıÃèÊö:
-	 *				»ñÈ¡Ò»¸ö´Ø´óĞ¡
+	 *  å‡½æ•°æè¿°:
+	 *				è·å–ä¸€ä¸ªç°‡å¤§å°
 	 *
 	 */
 	UINT64	GetClusterSize();
 
-	bool IsRoot(const QString & strFile);
+	bool IsRoot(const std::wstring& strFile);
 
 private:
-	QString					m_strPartitionName;
-	
+	std::wstring					m_strPartitionName;
+
 	LCNType					m_vecLCN;
-	QHash<QString, UINT64>	m_hashDirectoryMFT;
+	std::unordered_map<std::wstring, UINT64>	m_hashDirectoryMFT;
 	HANDLE					m_hDisk;
 	//QList<LPBYTE>			m_listBufferPool;
 	//CHXBufferPool			m_bufferPool;

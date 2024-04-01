@@ -1,18 +1,32 @@
-#pragma once
+ï»¿#pragma once
 #include <Windows.h>
+#include <cassert>
+
+#ifdef _HX_USE_QT_
+
 #include <QSharedPointer>
 #include <QWeakPointer> 
 #include <QReadWriteLock>
-
 #define _HX_DECLAR_SHARED_POINTER(X) typedef QSharedPointer<X> X##Ptr;
 #define _HX_DECLAR_WEAK_POINTER(X) typedef QWeakPointer<X> X##WeakPtr;
 
+#else
+
+#include <memory>
+#include <shared_mutex>
+
+#define _HX_DECLAR_SHARED_POINTER(X) typedef std::shared_ptr<X> X##Ptr;
+#define _HX_DECLAR_WEAK_POINTER(X) typedef std::weak_ptr<X> X##WeakPtr;
+
+#endif // _HX_USE_QT_
+
+
 enum class HXFileNameSpace : int8_t
 {
-	HXFileNameSpace_POSIZ		= 0x00,
-	HXFileNameSpace_Win32		= 0x01,
-	HXFileNameSpace_DOS			= 0x02,
-	HXFileNameSpace_WINAndDOS	= 0x03,
+	HXFileNameSpace_POSIZ = 0x00,
+	HXFileNameSpace_Win32 = 0x01,
+	HXFileNameSpace_DOS = 0x02,
+	HXFileNameSpace_WINAndDOS = 0x03,
 };
 
 #pragma pack(push)
@@ -23,63 +37,63 @@ typedef struct CHXBPB
 	//	0x00
 	BYTE	m_i8ArrJmp[3];
 	BYTE	m_i8ArrFileSystemID[8];
-	short	m_i16SectorSize;			//	ÉÈÇø´óĞ¡,×Ö½Ú
-	BYTE	m_i8ClusterSectorSize;		//	Ã¿´ØÉÈÇøÊı
+	short	m_i16SectorSize;			//	æ‰‡åŒºå¤§å°,å­—èŠ‚
+	BYTE	m_i8ClusterSectorSize;		//	æ¯ç°‡æ‰‡åŒºæ•°
 	BYTE	m_i8ArrReserve[2];
 
 	//	0x10
-	BYTE	m_i8ArrZero[3];				//	×ÜÎª0
-	BYTE	m_i8ArrNTFSZero1[2];		//	NTFS×ÜÎª0
-	BYTE	m_i8Device;					//	½éÖÊÃèÊö
+	BYTE	m_i8ArrZero[3];				//	æ€»ä¸º0
+	BYTE	m_i8ArrNTFSZero1[2];		//	NTFSæ€»ä¸º0
+	BYTE	m_i8Device;					//	ä»‹è´¨æè¿°
 	short	m_i16Zero;
-	short	m_i16TrackSectorSize;		//	´ÅµÀÉÈÇøÊı
-	short	m_i16Head;					//	´ÅÍ·Êı
-	INT32	m_i32HideSector;			//	Òş²ØÉÈÇøÊı
+	short	m_i16TrackSectorSize;		//	ç£é“æ‰‡åŒºæ•°
+	short	m_i16Head;					//	ç£å¤´æ•°
+	INT32	m_i32HideSector;			//	éšè—æ‰‡åŒºæ•°
 
 	//	0x20
-	BYTE	m_i8ArrNTFSZero2[4];		//	NTFS×ÜÎª0
-	BYTE	m_i8ArrNTFSNotUse[4];		//	NTFSÎ´Ê¹ÓÃ,×ÜÎª80008000
-	INT64	m_i64SectorTotalSize;		//	ÉÈÇø×ÜÊı
+	BYTE	m_i8ArrNTFSZero2[4];		//	NTFSæ€»ä¸º0
+	BYTE	m_i8ArrNTFSNotUse[4];		//	NTFSæœªä½¿ç”¨,æ€»ä¸º80008000
+	INT64	m_i64SectorTotalSize;		//	æ‰‡åŒºæ€»æ•°
 
 	//	0x30
-	INT64	m_i64MFTStartCluster;		//	MFTÆğÊ¼´Ø
-	INT64	m_i64MFTMirrStartCluster;	//	MFTMirrÆğÊ¼´Ø
+	INT64	m_i64MFTStartCluster;		//	MFTèµ·å§‹ç°‡
+	INT64	m_i64MFTMirrStartCluster;	//	MFTMirrèµ·å§‹ç°‡
 
 	//	0x40
-	BYTE	m_i8FileRecord;				//	ÎÄ¼ş¼ÇÂ¼´óĞ¡ÃèÊö
+	BYTE	m_i8FileRecord;				//	æ–‡ä»¶è®°å½•å¤§å°æè¿°
 	BYTE	m_i8ArrNotUse[3];
-	BYTE	m_i8IndexBufferSize;		//	Ë÷Òı´óĞ¡ÃèÊö
+	BYTE	m_i8IndexBufferSize;		//	ç´¢å¼•å¤§å°æè¿°
 	BYTE	m_i8ArrNotUse2[3];
-	INT64	m_i64VolumeSerialNumber;	//	¾íĞòÁĞºÅ
+	INT64	m_i64VolumeSerialNumber;	//	å·åºåˆ—å·
 
 	// 0x50
 	int		m_i32CheckCode;
 
-}*PHXBPB, *LPHXBPB;
+}*PHXBPB, * LPHXBPB;
 
 _HX_DECLAR_SHARED_POINTER(CHXBPB)
 _HX_DECLAR_WEAK_POINTER(CHXBPB)
 
-// ÎÄ¼ş¼ÇÂ¼Í·
+// æ–‡ä»¶è®°å½•å¤´
 typedef struct CHXFileRecordHeader
 {
 	//	0x00
 	BYTE	m_i8ArrMFT[4];					//	FILE
-	INT16	m_i16UpdateSequenceNumber;		//	¸üĞÂĞòÁĞºÅµÄÆ«ÒÆ
-	INT16	m_i16UpdateSequenceNumberSize;	//	¸üĞÂĞòÁĞºÅµÄ´óĞ¡ÓëÊı×é
-	INT64	m_i64LogSequence;				//	ÈÕÖ¾ÎÄ¼şĞòºÅ
+	INT16	m_i16UpdateSequenceNumber;		//	æ›´æ–°åºåˆ—å·çš„åç§»
+	INT16	m_i16UpdateSequenceNumberSize;	//	æ›´æ–°åºåˆ—å·çš„å¤§å°ä¸æ•°ç»„
+	INT64	m_i64LogSequence;				//	æ—¥å¿—æ–‡ä»¶åºå·
 
 
 	//	0x10
-	INT16	m_i16Sequence;					//	ĞòÁĞºÅ
-	INT16	m_i16HardLinkSize;				//	Ó²Á´½ÓÊıÁ¿
-	INT16	m_i16FirstAttribute;			//	µÚÒ»¸öÊôĞÔÆ«ÒÆµØÖ·
-	INT16	m_i16Flag;						//	±êÖ¾£¬´ú±íÊÇ·ñÔÚÊ¹ÓÃÉ¾³ıµÈ
-	UINT32	m_u32FileRecordRealSize;		//	ÎÄ¼ş¼ÇÂ¼Êµ¼Ê³¤¶È
-	UINT32	m_i32FileRecordSize;			//	ÎÄ¼ş¼ÇÂ¼·ÖÅä³¤¶È
+	INT16	m_i16Sequence;					//	åºåˆ—å·
+	INT16	m_i16HardLinkSize;				//	ç¡¬é“¾æ¥æ•°é‡
+	INT16	m_i16FirstAttribute;			//	ç¬¬ä¸€ä¸ªå±æ€§åç§»åœ°å€
+	INT16	m_i16Flag;						//	æ ‡å¿—ï¼Œä»£è¡¨æ˜¯å¦åœ¨ä½¿ç”¨åˆ é™¤ç­‰
+	UINT32	m_u32FileRecordRealSize;		//	æ–‡ä»¶è®°å½•å®é™…é•¿åº¦
+	UINT32	m_i32FileRecordSize;			//	æ–‡ä»¶è®°å½•åˆ†é…é•¿åº¦
 
 	//	0x20
-	INT64	m_i64Index;						//	»ù±¾ÎÄ¼ş¼ÇÂ¼Ë÷Òı
+	INT64	m_i64Index;						//	åŸºæœ¬æ–‡ä»¶è®°å½•ç´¢å¼•
 	INT16	m_i16NextID;
 	INT16	m_i16End;
 	INT32	m_i64FileRecordReferenceNumber;
@@ -92,55 +106,55 @@ typedef struct CHXFileRecordHeader
 	{
 		return m_i32FileRecordSize;
 	}
-} *PHXFileRecordHeader, *LPHXFileRecordHeader;
+} *PHXFileRecordHeader, * LPHXFileRecordHeader;
 
-//	³£×¤ÊôĞÔÍ·Óë·Ç³£×¤ÊôĞÔÍ·µÄ¹«¹²Í·
+//	å¸¸é©»å±æ€§å¤´ä¸éå¸¸é©»å±æ€§å¤´çš„å…¬å…±å¤´
 typedef struct CHXAttributeHeader
 {
 	//	0x00
-	INT32	m_i32Flag;						//	ÊôĞÔ±êÊ¶	ÎŞÃû³ÆÊôĞÔ±êÊ¶Îª10HºÍ30H	ÓĞÃû³ÆÊôĞÔ±êÊ¶Îª90H¡¢B0H
-	INT32	m_i32TotalLength;				//	°üÀ¨ÊôĞÔÍ·ÔÚÄÚ³¤¶È
-	BYTE	m_u8PermanentFlag;				//	³£×¤ÊôĞÔ 0³£×¤
-	BYTE	m_u8NameLength;					//	ÊôĞÔÃû³¤¶È ÅĞ¶ÏÊÇ·ñÓĞÊôĞÔÃû³Æ
+	INT32	m_i32Flag;						//	å±æ€§æ ‡è¯†	æ— åç§°å±æ€§æ ‡è¯†ä¸º10Hå’Œ30H	æœ‰åç§°å±æ€§æ ‡è¯†ä¸º90Hã€B0H
+	INT32	m_i32TotalLength;				//	åŒ…æ‹¬å±æ€§å¤´åœ¨å†…é•¿åº¦
+	BYTE	m_u8PermanentFlag;				//	å¸¸é©»å±æ€§ 0å¸¸é©»
+	BYTE	m_u8NameLength;					//	å±æ€§åé•¿åº¦ åˆ¤æ–­æ˜¯å¦æœ‰å±æ€§åç§°
 
 	// 0x0B
-	short	m_i16NameStartOffset;			//	ÊôĞÔÃû³Æ¿ªÊ¼Æ«ÒÆ
-	UINT16	m_u16CompressFlage;				//	Ñ¹Ëõ±êÊ¶
-	short	m_i16ID;						//	ÊôĞÔID
+	short	m_i16NameStartOffset;			//	å±æ€§åç§°å¼€å§‹åç§»
+	UINT16	m_u16CompressFlage;				//	å‹ç¼©æ ‡è¯†
+	short	m_i16ID;						//	å±æ€§ID
 
 	union
 	{
-		// ³£×¤ÊôĞÔÍ·
+		// å¸¸é©»å±æ€§å¤´
 		struct CHXPermanentAttributeHeader
 		{
 			//	0x10
-			INT32	m_i32BodyLength;				//	ÊôĞÔÌå³¤¶È
-			short	m_i32BodyOffset;				//	ÊôĞÔÌå¿ªÊ¼Æ«ÒÆ
+			INT32	m_i32BodyLength;				//	å±æ€§ä½“é•¿åº¦
+			short	m_i32BodyOffset;				//	å±æ€§ä½“å¼€å§‹åç§»
 			BYTE	m_i8IndexFlag;
 			BYTE	m_i8Reserve;
-			// Èç¹ûÓĞÃû³ÆÊôĞÔÍ·£¬ÒÔÏÂbufferÏÈÎªÊôĞÔÃû³ÆºóÎªÊôĞÔÌå
+			// å¦‚æœæœ‰åç§°å±æ€§å¤´ï¼Œä»¥ä¸‹bufferå…ˆä¸ºå±æ€§åç§°åä¸ºå±æ€§ä½“
 		} m_PermanentAttribute;
 
-		// ·Ç³£×¤ÊôĞÔÍ·
+		// éå¸¸é©»å±æ€§å¤´
 		struct CHXVariableAttribute
 		{
 			//	0x10
-			INT64	m_i64BodyStartCluster;			//	ÊôĞÔÌåÆğÊ¼ĞéÄâ´ØºÅVCN
-			INT64	m_i64BodyEndCluster;			//	ÊôĞÔÌå½áÊøĞéÄâ´ØºÅ
+			INT64	m_i64BodyStartCluster;			//	å±æ€§ä½“èµ·å§‹è™šæ‹Ÿç°‡å·VCN
+			INT64	m_i64BodyEndCluster;			//	å±æ€§ä½“ç»“æŸè™šæ‹Ÿç°‡å·
 
 			//	0x20
-			short	m_i16RunListOffset;				//	Run ListµÄÆ«ÒÆ
-			short	m_i16CompressSize;				//	Ñ¹Ëõµ¥Î»´óĞ¡
+			short	m_i16RunListOffset;				//	Run Listçš„åç§»
+			short	m_i16CompressSize;				//	å‹ç¼©å•ä½å¤§å°
 			INT32	m_i32NotUse;
-			INT64	m_i64BodySpaceSize;				//	ÊôĞÔÌå·ÖÅä´óĞ¡
+			INT64	m_i64BodySpaceSize;				//	å±æ€§ä½“åˆ†é…å¤§å°
 
 			//	0x30
-			INT64	m_i64BodyRealSize;				//	ÊôĞÔÌåÊµ¼Ê´óĞ¡
-			// Èç¹ûÓĞÃû³ÆÊôĞÔÍ·£¬ÒÔÏÂbufferÏÈÎªÊôĞÔÃû³ÆºóÎªÊôĞÔÌå
+			INT64	m_i64BodyRealSize;				//	å±æ€§ä½“å®é™…å¤§å°
+			// å¦‚æœæœ‰åç§°å±æ€§å¤´ï¼Œä»¥ä¸‹bufferå…ˆä¸ºå±æ€§åç§°åä¸ºå±æ€§ä½“
 		} m_VariableAttribute;
 	}m_unExpand;
 
-	//	Ä¿Ç°°æ±¾Ö»ÓÃ2¸ö×Ö½Ú
+	//	ç›®å‰ç‰ˆæœ¬åªç”¨2ä¸ªå­—èŠ‚
 	INT32 GeAllSize()
 	{
 		return m_i32TotalLength & 0x0000FFFF;
@@ -196,7 +210,7 @@ private:
 		}
 		return i32OffsetBody;
 	}
-} *PHXAttribute, *LPHXAttribute;
+} *PHXAttribute, * LPHXAttribute;
 
 typedef struct CHXFileRecordListBody
 {
@@ -211,8 +225,8 @@ typedef struct CHXFileRecordListBody
 	UINT64	m_u64AttributeMFT;
 	INT16	m_i16AttributeID;
 
-	//	ÒÔÏÂÎªÃû³Æ
-} *PHXFileRecordListBody, *LPHXFileRecordListBody;
+	//	ä»¥ä¸‹ä¸ºåç§°
+} *PHXFileRecordListBody, * LPHXFileRecordListBody;
 
 typedef struct CHXFileRecordStandardInformationBody
 {
@@ -221,11 +235,11 @@ typedef struct CHXFileRecordStandardInformationBody
 	INT64	m_i64LastModifyTime;
 
 	//	0x10
-	INT64	m_i64LastModifyFileRecordTime;		//	MFTĞŞ¸ÄÊ±¼ä
+	INT64	m_i64LastModifyFileRecordTime;		//	MFTä¿®æ”¹æ—¶é—´
 	INT64	m_i64LastVisitTime;
 
 	//	0x20
-	INT32	m_i32FileType;						//	´«Í³ÎÄ¼şÊôĞÔ
+	INT32	m_i32FileType;						//	ä¼ ç»Ÿæ–‡ä»¶å±æ€§
 	INT32	m_i32MaxVersion;
 	INT32	m_i32Version;
 	INT32	m_i32ClassificationID;
@@ -236,7 +250,7 @@ typedef struct CHXFileRecordStandardInformationBody
 	INT64	m_i64QuotaManagement;
 	//	0x40
 	INT64	m_i64UpdateSerialNumber;
-} *PHXFileRecordStandardInformationBody, *LPHXFileRecordStandardInformationBody;
+} *PHXFileRecordStandardInformationBody, * LPHXFileRecordStandardInformationBody;
 
 typedef struct CHXFileRecordFileNameBody
 {
@@ -246,7 +260,7 @@ typedef struct CHXFileRecordFileNameBody
 
 	//	0x10
 	INT64	m_i64LastModifyTime;
-	INT64	m_i64LastModifyFileRecordTime;		//	MFTĞŞ¸ÄÊ±¼ä
+	INT64	m_i64LastModifyFileRecordTime;		//	MFTä¿®æ”¹æ—¶é—´
 
 	//	0x20
 	INT64	m_i64LastVisitTime;
@@ -260,55 +274,55 @@ typedef struct CHXFileRecordFileNameBody
 	//	0x40
 	INT8	m_i8NameLength;
 	INT8	m_i8NameSpace;
-	//	0x42 ºóÃæ´ú±íÃû³Æ
-} *PHXFileRecordFileNameBody, *LPHXFileRecordFileNameBody;
+	//	0x42 åé¢ä»£è¡¨åç§°
+} *PHXFileRecordFileNameBody, * LPHXFileRecordFileNameBody;
 
 typedef struct CHXFileRecordIndexRoot
 {
 	INT32	m_i32Type;				//
 	INT32	m_i32CheckRule;
-	INT32	m_i32IndexBufferSize;	//	Ã¿¸öË÷Òı»º³åÇøµÄ·ÖÅä´óĞ¡ £¨×Ö½Ú£©
-	INT8	m_i8IndexBufferCluster;	//	Ã¿¸öË÷Òı»º³åµÄ´ØÊı
-	INT8	m_i8Arr[3];				//	ÎŞÒâÒå
-} *PHXFileRecordIndexRoot, *LPHXFileRecordIndexRoot;
+	INT32	m_i32IndexBufferSize;	//	æ¯ä¸ªç´¢å¼•ç¼“å†²åŒºçš„åˆ†é…å¤§å° ï¼ˆå­—èŠ‚ï¼‰
+	INT8	m_i8IndexBufferCluster;	//	æ¯ä¸ªç´¢å¼•ç¼“å†²çš„ç°‡æ•°
+	INT8	m_i8Arr[3];				//	æ— æ„ä¹‰
+} *PHXFileRecordIndexRoot, * LPHXFileRecordIndexRoot;
 
 typedef struct CHXFileRecordIndexHeader
 {
 	INT32	m_i32FirstIndexOffset;
 	INT32	m_i32AllIndexRealSize;
-	INT32	m_i32AllIndexSpaceSize;	//	Ã¿¸öË÷Òı»º³åÇøµÄ·ÖÅä´óĞ¡ £¨×Ö½Ú£©
-	INT8	m_i8IndexFlag;			//	Ë÷Òı±êÊ¶¡£1Îª´óË÷Òı£¬0ÎªĞ¡Ë÷Òı
-	INT8	m_i8Arr[3];				//	ÎŞÒâÒå
-} *PHXFileRecordIndexHeader, *LPHXFileRecordIndexHeader;
+	INT32	m_i32AllIndexSpaceSize;	//	æ¯ä¸ªç´¢å¼•ç¼“å†²åŒºçš„åˆ†é…å¤§å° ï¼ˆå­—èŠ‚ï¼‰
+	INT8	m_i8IndexFlag;			//	ç´¢å¼•æ ‡è¯†ã€‚1ä¸ºå¤§ç´¢å¼•ï¼Œ0ä¸ºå°ç´¢å¼•
+	INT8	m_i8Arr[3];				//	æ— æ„ä¹‰
+} *PHXFileRecordIndexHeader, * LPHXFileRecordIndexHeader;
 
-//	±ê×¼Ë÷ÒıÍ·
+//	æ ‡å‡†ç´¢å¼•å¤´
 typedef struct CHXIndexHeader
 {
 	//	0x00
-	INT32	m_i32Flag;						//	×ÜÎªINDX
-	INT16	m_i16UpdateSequenceNumber;		//	¸üĞÂĞòÁĞºÅ
-	INT16	m_i16UpdateSequenceNumberSize;	//	¸üĞÂĞòÁĞºÅÓë¸üĞÂÊı×éÒÔ×ÖÎªµ¥Î»µÄ´óĞ¡£¨S£©
+	INT32	m_i32Flag;						//	æ€»ä¸ºINDX
+	INT16	m_i16UpdateSequenceNumber;		//	æ›´æ–°åºåˆ—å·
+	INT16	m_i16UpdateSequenceNumberSize;	//	æ›´æ–°åºåˆ—å·ä¸æ›´æ–°æ•°ç»„ä»¥å­—ä¸ºå•ä½çš„å¤§å°ï¼ˆSï¼‰
 	INT64	m_i64LogFileSequenceNumber;
 
 	//	0x10
 	INT64	m_i64VCN;
 
-	INT32	m_i32Offset;					//	ËãµÄÊÇ´Ó0x18¿ªÊ¼µÄÆ«ÒÆ
-	INT32	m_i32IndexRealSize;				
+	INT32	m_i32Offset;					//	ç®—çš„æ˜¯ä»0x18å¼€å§‹çš„åç§»
+	INT32	m_i32IndexRealSize;
 
 	//	0x20
-	INT32	m_i32IndexSpaceSize;			//	ËãµÄÊÇ´Ó0x18¿ªÊ¼µÄ´óĞ¡
+	INT32	m_i32IndexSpaceSize;			//	ç®—çš„æ˜¯ä»0x18å¼€å§‹çš„å¤§å°
 	INT8	m_i8Node;
 	INT8	m_i8ArrNotUse[3];
 	UINT16	m_u16UpdateSequence;
 
-	//	0x2A¿ªÊ¼Îª¸üĞÂĞòÁĞÊı×é 2S-2
+	//	0x2Aå¼€å§‹ä¸ºæ›´æ–°åºåˆ—æ•°ç»„ 2S-2
 
 	INT32 GetAllSize()
 	{
 		return m_i32IndexSpaceSize + 0x18;
 	}
-} *PHXIndexHeader, *LPHXIndexHeader;
+} *PHXIndexHeader, * LPHXIndexHeader;
 
 typedef struct CHXIndex
 {
@@ -316,7 +330,7 @@ typedef struct CHXIndex
 	INT64	m_i64MFT;
 	UINT16	m_u16IndexSize;
 	UINT16	m_u16NameSize;
-	INT16	m_i16Flag;				//	1°üº¬Ò»¸ö×Ó½Úµã£¬2Îª×îºóÒ»¸öÏî
+	INT16	m_i16Flag;				//	1åŒ…å«ä¸€ä¸ªå­èŠ‚ç‚¹ï¼Œ2ä¸ºæœ€åä¸€ä¸ªé¡¹
 	INT16	m_i16NotUse;
 
 	//	0x10
@@ -338,19 +352,19 @@ typedef struct CHXIndex
 	//	0x50
 	UINT8	m_u8FileNameLength;
 	UINT8	m_u8FileNameSpace;
-	//	ÎÄ¼şÃû³ÆÌî³äµ½8µÄÕûÊı±¶
+	//	æ–‡ä»¶åç§°å¡«å……åˆ°8çš„æ•´æ•°å€
 	UINT8	m_u8ArrName;
-	//	×Ó½ÚµãË÷ÒıËùÔÚVCN
-} *PHXIndex, *LPHXIndex;
+	//	å­èŠ‚ç‚¹ç´¢å¼•æ‰€åœ¨VCN
+} *PHXIndex, * LPHXIndex;
 
-//	¶ÁBufferÊ±·¶Î§
+//	è¯»Bufferæ—¶èŒƒå›´
 struct CHXReadBufferRange
 {
 	UINT32	m_i32ReadSize;
 	UINT32	m_i32AllSize;
 };
 
-////	¶ÁMFTÊ±·¶Î§
+////	è¯»MFTæ—¶èŒƒå›´
 //struct CHXReadMFTRange
 //{
 //	UINT32	m_i32StartIndex;
@@ -361,7 +375,7 @@ struct CHXReadBufferRange
 
 
 
-//	ÊôĞÔÀàĞÍ
+//	å±æ€§ç±»å‹
 enum HXAttributeType
 {
 	HXAttribute_StandardInformation = 0x10,
@@ -390,7 +404,7 @@ enum HXCompressFlag : UINT16
 	HXCompressFlag_SparseFile = 0x8000,
 };
 
-typedef QVector<QPair<INT64, INT64> >	LCNType;
+typedef std::vector<QPair<INT64, INT64> >	LCNType;
 struct VCNData
 {
 	UINT64	m_u64StartCluster;
@@ -399,10 +413,10 @@ struct VCNData
 
 	VCNData() :m_u64StartCluster(-1L), m_u64EndCluster(-1L) {}
 };
-typedef QVector<VCNData>					VCNType;
+typedef std::vector<VCNData>					VCNType;
 typedef std::vector<INT8>							BitMapType;
 
-//	²éÕÒË÷ÒıĞÅÏ¢²ÎÊı
+//	æŸ¥æ‰¾ç´¢å¼•ä¿¡æ¯å‚æ•°
 typedef struct CHXIndexParam
 {
 	LPHXIndex		m_pIndex;
@@ -413,12 +427,16 @@ typedef struct CHXIndexParam
 	UINT32			m_i32AllSize;
 	//UINT32			m_i32StartIndex;
 	//UINT32			m_i32EndIndex;
-	VecFileInfo*	m_pvecFileInfo;
-	QString			m_strDir;
-	//QString	m_strFileName;
+	VecFileInfo* m_pvecFileInfo;
+#ifdef _HX_USE_QT_
+	std::wstring			m_strDir;
+#else
+	std::wstring	m_strDir;
+#endif // _HX_USE_QT_
+	//std::wstring	m_strFileName;
 
-	BOOL			m_bFindFile;//ÊÇ·ñÎª²éÕÒÎÄ¼ş
-	INT64			m_i64MFTNumber;//Ä¿±êÎÄ¼şµÄMFT
+	BOOL			m_bFindFile;//æ˜¯å¦ä¸ºæŸ¥æ‰¾æ–‡ä»¶
+	INT64			m_i64MFTNumber;//ç›®æ ‡æ–‡ä»¶çš„MFT
 
 	CHXIndexParam() : m_pIndex(nullptr),
 		m_pvecFileInfo(nullptr),
@@ -436,11 +454,11 @@ typedef struct CHXIndexParam
 } *LPHXIndexParam;
 
 
-//	²éÕÒË÷ÒıĞÅÏ¢²ÎÊı
+//	æŸ¥æ‰¾ç´¢å¼•ä¿¡æ¯å‚æ•°
 typedef struct CHXFindFileParam
 {
 	UINT8		m_u8PermanentFlag;
-	UINT16		m_u16CompressFlage;				//	Ñ¹Ëõ±êÊ¶
+	UINT16		m_u16CompressFlage;				//	å‹ç¼©æ ‡è¯†
 	UINT32		m_u8PermanentSize;
 
 	UINT64		m_u64SpaceSize;
@@ -448,8 +466,8 @@ typedef struct CHXFindFileParam
 
 	LPBYTE		m_pPermanentBuffer;
 	//LCNType		m_vecLVN;
-	VCNType		m_vecVCN;//VCNºÍLCN¶ÔÓ¦¹ØÏµ
-	BitMapType	m_vecBitMap;//ºÍVCN¶ÔÓ¦µÄÎ»Í¼ĞÅÏ¢
+	VCNType		m_vecVCN;//VCNå’ŒLCNå¯¹åº”å…³ç³»
+	BitMapType	m_vecBitMap;//å’ŒVCNå¯¹åº”çš„ä½å›¾ä¿¡æ¯
 
 	CHXFindFileParam() : m_pPermanentBuffer(nullptr),
 		m_u8PermanentFlag(0),
@@ -464,11 +482,11 @@ typedef struct CHXFindFileParam
 	{
 		_HX_DELETE_PTR_ARRAY_(m_pPermanentBuffer);
 	}
-	CHXFindFileParam(const CHXFindFileParam &) = delete;
-	CHXFindFileParam & operator=(const CHXFindFileParam &) = delete;
+	CHXFindFileParam(const CHXFindFileParam&) = delete;
+	CHXFindFileParam& operator=(const CHXFindFileParam&) = delete;
 } *LPHXFindFileParam;
 
-//	ÎÄ¼ş¼ÇÂ¼ĞÅÏ¢
+//	æ–‡ä»¶è®°å½•ä¿¡æ¯
 struct CHXFileRecordData
 {
 	UINT64	m_u64VCNStart;
@@ -484,20 +502,25 @@ enum CHXBufferType
 };
 
 class CHXBufferPool;
-//	ÄÚ´æÈ±Ò³ Ê±ÖÓ(CLOCK)ÖÃ»»Ëã·¨
+//	å†…å­˜ç¼ºé¡µ æ—¶é’Ÿ(CLOCK)ç½®æ¢ç®—æ³•
 struct CHXBufferData
 {
 	//friend class CHXBufferPool;
 	//friend class HXNTFSCache;
 	DWORD			m_ThreaID;
 private:
-	UINT16			m_u16Used;		// 0´ú±íÎ´Ê¹ÓÃ£¬1´ú±íÕ¼ÓÃ
-	UINT16			m_u16Flag;		// 0´ú±íÎ´Ê¹ÓÃ£¬1´ú±íÕıÔÚÊ¹ÓÃ
+	UINT16			m_u16Used;		// 0ä»£è¡¨æœªä½¿ç”¨ï¼Œ1ä»£è¡¨å ç”¨
+	UINT16			m_u16Flag;		// 0ä»£è¡¨æœªä½¿ç”¨ï¼Œ1ä»£è¡¨æ­£åœ¨ä½¿ç”¨
 	LPBYTE			m_pBuffer;
 	UINT64			m_u64BufferStart;
 	UINT64			m_u64RealSize;
 	UINT64			m_u64SpaceSize;
+#ifdef _HX_USE_QT_
 	QReadWriteLock	m_lock;
+#else
+	std::shared_mutex m_lock;
+#endif // _HX_USE_QT_
+
 public:
 	CHXBufferData() :
 		m_pBuffer(nullptr)
@@ -510,7 +533,12 @@ public:
 
 	void InitLock(UINT64 u64BufferSize)
 	{
+#ifdef _HX_USE_QT_
 		QWriteLocker locker(&m_lock);
+#else
+		std::unique_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
+
 		m_u16Flag = 0;
 		m_pBuffer = new BYTE[u64BufferSize];
 		m_u64BufferStart = 0;
@@ -521,7 +549,11 @@ public:
 
 	bool ClockReplacementLock()
 	{
+#ifdef _HX_USE_QT_
 		QWriteLocker locker(&m_lock);
+#else
+		std::unique_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
 		if (0 == m_u16Used)
 		{
 			if (0 == m_u16Flag)
@@ -538,7 +570,11 @@ public:
 
 	void SetUsedLock(bool bUsed)
 	{
+#ifdef _HX_USE_QT_
 		QWriteLocker locker(&m_lock);
+#else
+		std::unique_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
 		if (bUsed)
 		{
 			m_u16Used++;
@@ -547,23 +583,31 @@ public:
 		else
 		{
 			m_u16Used--;
-			Q_ASSERT(false == (m_u16Used & 0x8000));
+			assert(false == (m_u16Used & 0x8000));
 		}
 	}
 
 	UINT64 GetSpaceSizeLock()
 	{
+#ifdef _HX_USE_QT_
 		QReadLocker locker(&m_lock);
+#else
+		std::shared_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
 		return m_u64SpaceSize;
 	}
 
-	LPBYTE GetBufferLock(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD & i32Readsize)
+	LPBYTE GetBufferLock(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD& i32Readsize)
 	{
 		if (0 == m_u64RealSize)
 		{
 			return nullptr;
 		}
+#ifdef _HX_USE_QT_
 		QReadLocker locker(&m_lock);
+#else
+		std::shared_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
 		LPBYTE pBuffer = nullptr;
 
 		if (i64FilePointer.QuadPart >= m_u64BufferStart
@@ -580,13 +624,21 @@ public:
 
 	void ResetLock()
 	{
+#ifdef _HX_USE_QT_
 		QWriteLocker locker(&m_lock);
+#else
+		std::unique_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
 		m_u64RealSize = 0;
 	}
 
 	bool FreeBufferLock(LPBYTE pBuffer)
 	{
+#ifdef _HX_USE_QT_
 		QWriteLocker locker(&m_lock);
+#else
+		std::unique_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
 		if (m_pBuffer <= pBuffer
 			&& pBuffer <= (m_pBuffer + m_u64SpaceSize))
 		{
@@ -604,20 +656,28 @@ public:
 
 	LPBYTE WriteBufferLock()
 	{
+#ifdef _HX_USE_QT_
 		m_lock.lockForWrite();
+#else
+		m_lock.lock();
+#endif // _HX_USE_QT_
 		return m_pBuffer;
 	}
 	LPBYTE ReadBufferLock()
 	{
+#ifdef _HX_USE_QT_
 		m_lock.lockForRead();
+#else
+		m_lock.lock_shared();
+#endif // _HX_USE_QT_
 		return m_pBuffer;
 	}
-	// ĞèÒªlock
+	// éœ€è¦lock
 	void SetStart(UINT64 u64Start)
 	{
 		m_u64BufferStart = u64Start;
 	}
-	// ĞèÒªlock
+	// éœ€è¦lock
 	void SetRealSize(UINT64 u64RealSize)
 	{
 		m_u64RealSize = u64RealSize;
@@ -643,11 +703,20 @@ public:
 
 };
 _HX_DECLAR_SHARED_POINTER(CHXBufferData)
+
+#ifdef _HX_USE_QT_
+
 typedef QList<CHXBufferDataPtr> ListHXBufferPtr;
+typedef QSet<UINT64> SetMFTNumber;
+
+#else
+
+typedef std::vector<CHXBufferDataPtr> VectorHXBufferPtr;
+typedef std::set<UINT64> SetMFTNumber;
+
+#endif // _HX_USE_QT_
 
 typedef std::vector<CHXFileRecordData> VecFileRecordData;
-
-typedef QSet<UINT64> SetMFTNumber;
 
 
 _HX_DECLAR_SHARED_POINTER(CHXFileRecordHeader)

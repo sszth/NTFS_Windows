@@ -64,7 +64,7 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>5.14.0</QtInstall>
+    <QtInstall>Qt5.15.2_x64</QtInstall>
     <QtModules>core;xml</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>

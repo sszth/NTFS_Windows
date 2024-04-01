@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include <QDebug>
+Ôªø#include "stdafx.h"
+//#include <QDebug>
 #include "HXNTFSCache.h"
 
 const static int g_cs_i32BPBSize = 512;
@@ -17,10 +17,14 @@ HXNTFSCache::~HXNTFSCache()
 {
 }
 
-// ≥ı ºªØª∫≥Â«¯
-int	HXNTFSCache::BuildCache(const QString & strPartitionName)
+// ÂàùÂßãÂåñÁºìÂÜ≤Âå∫
+int	HXNTFSCache::BuildCache(const std::wstring & strPartitionName)
 {
+#ifdef _HX_USE_QT_
 	if (false == m_pBPB.isNull())
+#else
+	if (nullptr == m_pBPB)
+#endif // _HX_USE_QT_
 	{
 		return 0;
 	}
@@ -101,7 +105,11 @@ void HXNTFSCache::SetUsed(CHXBufferDataPtr pBuffer, bool bUsed)
 
 void HXNTFSCache::FreeBuffer(LPBYTE pBuffer)
 {
+#ifdef _HX_USE_QT_
 	QWriteLocker locker(&m_lock);
+#else
+	std::unique_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
 	m_bufferPool.FreeBuffer(pBuffer);
 }
 
@@ -117,7 +125,12 @@ void HXNTFSCache::Refresh()
 
 LPBYTE HXNTFSCache::ReadBuffer(LARGE_INTEGER i64FilePointer, DWORD i32FileRecordSize, DWORD & i32Readsize, DWORD i32MoveMethod)
 {
+#ifdef _HX_USE_QT_
 	QWriteLocker locker(&m_lock);
+#else
+	std::unique_lock<std::shared_mutex> locker(m_lock);
+#endif // _HX_USE_QT_
+	
 	LPBYTE pBuffer = m_bufferPool.GetPoolBuffer(i64FilePointer, i32FileRecordSize, i32Readsize);
 	if (nullptr != pBuffer)
 	{
@@ -183,11 +196,11 @@ LPHXFileRecordHeader HXNTFSCache::GetRootFileRecord()
 
 int HXNTFSCache::OpenDisk()
 {
-	QString strPartition;
-	strPartition = u8"\\\\.\\";
+	std::wstring strPartition;
+	strPartition = L"\\\\.\\";
 	strPartition += m_strPartitionName;
 
-	m_hDisk = CreateFile(strPartition.toStdWString().c_str(),
+	m_hDisk = CreateFile(strPartition.c_str(),
 		GENERIC_READ,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL,
@@ -197,7 +210,8 @@ int HXNTFSCache::OpenDisk()
 
 	if (INVALID_HANDLE_VALUE == m_hDisk)
 	{
-		qCritical() << "Open Disk Failed:" << strPartition;
+		assert(0);
+		//qCritical() << "Open Disk Failed:" << strPartition;
 		return -1;
 	}
 	return 0;
@@ -248,8 +262,12 @@ int HXNTFSCache::GetBPBInfo()
 	pBuffer->SetRealSize(readsize);
 	pBuffer->UnLock();
 
-	// BPB√ª”–512◊÷Ω⁄
+	// BPBÊ≤°Êúâ512Â≠óËäÇ
+#ifdef _HX_USE_QT_
 	m_pBPB = QSharedPointer<CHXBPB>(new CHXBPB);
+#else
+	m_pBPB = std::shared_ptr<CHXBPB>(new CHXBPB);
+#endif // _HX_USE_QT_
 
 	memcpy_s(m_pBPB.get(), sizeof(CHXBPB), pBufferData, sizeof(CHXBPB));
 
