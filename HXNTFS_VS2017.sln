@@ -1,0 +1,70 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1433
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HXNTFSExplorer", "HXNTFSExplorer\HXNTFSExplorer_vs2017.vcxproj", "{53144866-9344-48CD-8205-866450526F42}"
+	ProjectSection(ProjectDependencies) = postProject
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017} = {435CF3F9-1216-4DD1-9FE2-CFE904438017}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FileSystem", "FileSystem", "{D4B3BAF0-5551-4241-AF69-D112611CD69F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{D1B5F8F1-B4C9-41FC-A827-B291058046C3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{48E57C16-F6AF-4568-9AD2-6D9128558993}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HXFileSystemPlugin", "HXFileSystem\HXFileSystem.vcxproj", "{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HXNTFSPlugin", "HXNTFSPlugin\HXNTFSPlugin.vcxproj", "{435CF3F9-1216-4DD1-9FE2-CFE904438017}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QtGuiApplication2", "QtGuiApplication2\QtGuiApplication2.vcxproj", "{44DD07CA-F714-4E6E-A45A-57BC008085C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53144866-9344-48CD-8205-866450526F42}.Debug|x64.ActiveCfg = Debug|Win32
+		{53144866-9344-48CD-8205-866450526F42}.Debug|x86.ActiveCfg = Debug|Win32
+		{53144866-9344-48CD-8205-866450526F42}.Debug|x86.Build.0 = Debug|Win32
+		{53144866-9344-48CD-8205-866450526F42}.Release|x64.ActiveCfg = Release|Win32
+		{53144866-9344-48CD-8205-866450526F42}.Release|x86.ActiveCfg = Release|Win32
+		{53144866-9344-48CD-8205-866450526F42}.Release|x86.Build.0 = Release|Win32
+		{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F}.Debug|x64.ActiveCfg = Debug|x64
+		{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F}.Debug|x64.Build.0 = Debug|x64
+		{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F}.Debug|x86.ActiveCfg = Debug|Win32
+		{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F}.Debug|x86.Build.0 = Debug|Win32
+		{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F}.Release|x64.ActiveCfg = Release|x64
+		{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F}.Release|x64.Build.0 = Release|x64
+		{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F}.Release|x86.ActiveCfg = Release|x64
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017}.Debug|x64.ActiveCfg = Debug|x64
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017}.Debug|x64.Build.0 = Debug|x64
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017}.Debug|x86.ActiveCfg = Debug|Win32
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017}.Debug|x86.Build.0 = Debug|Win32
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017}.Release|x64.ActiveCfg = Release|x64
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017}.Release|x64.Build.0 = Release|x64
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017}.Release|x86.ActiveCfg = Release|x64
+		{44DD07CA-F714-4E6E-A45A-57BC008085C6}.Debug|x64.ActiveCfg = Debug|x64
+		{44DD07CA-F714-4E6E-A45A-57BC008085C6}.Debug|x64.Build.0 = Debug|x64
+		{44DD07CA-F714-4E6E-A45A-57BC008085C6}.Debug|x86.ActiveCfg = Debug|x64
+		{44DD07CA-F714-4E6E-A45A-57BC008085C6}.Release|x64.ActiveCfg = Release|x64
+		{44DD07CA-F714-4E6E-A45A-57BC008085C6}.Release|x64.Build.0 = Release|x64
+		{44DD07CA-F714-4E6E-A45A-57BC008085C6}.Release|x86.ActiveCfg = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{53144866-9344-48CD-8205-866450526F42} = {48E57C16-F6AF-4568-9AD2-6D9128558993}
+		{9F8FBEF8-32A0-4798-95AE-08B2A0CAFB4F} = {D4B3BAF0-5551-4241-AF69-D112611CD69F}
+		{435CF3F9-1216-4DD1-9FE2-CFE904438017} = {D4B3BAF0-5551-4241-AF69-D112611CD69F}
+		{44DD07CA-F714-4E6E-A45A-57BC008085C6} = {D1B5F8F1-B4C9-41FC-A827-B291058046C3}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {99E3B02E-D5A6-4554-A8A6-34FD202635D0}
+	EndGlobalSection
+EndGlobal

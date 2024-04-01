@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/HXNTFSExplorer">
+        <file>Resources/dracula.css</file>
+        <file>Resources/文件夹.png</file>
+    </qresource>
+</RCC>

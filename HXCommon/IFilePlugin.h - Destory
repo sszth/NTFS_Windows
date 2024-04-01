@@ -1,0 +1,15 @@
+#pragma once
+
+class IFilePlugin
+{
+public:
+	IFilePlugin() {};
+	virtual ~IFilePlugin() {}
+
+	virtual int OnCommand(int i32Cmd, void * pParam, void * pReturn)
+	{
+		return 0;
+	}
+private:
+	//TODO: ฑ๊สถ
+};
