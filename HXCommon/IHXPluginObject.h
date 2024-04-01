@@ -6,14 +6,14 @@ class IHXPluginObject
 {
 public:
 	explicit IHXPluginObject(	const int & iPluginID, 
-								const QString & strPluginName,
-								const QString & strFileName)
+								const std::wstring & strPluginName,
+								const std::wstring & strFileName)
 								:_iPluginID(iPluginID), 
 								_strPluginName(strPluginName),
 								_strPluginDll(strFileName){}
 	explicit IHXPluginObject(	const int && iPluginID, 
-								const QString && strPluginName,
-								const QString && strFileName)
+								const std::wstring && strPluginName,
+								const std::wstring && strFileName)
 								:_iPluginID(iPluginID),
 								_strPluginName(strPluginName),
 								_strPluginDll(strFileName) {}
@@ -29,36 +29,36 @@ public:
 		return _iPluginID;
 	}
 
-	const QString & GetPluginName() const
+	const std::wstring & GetPluginName() const
 	{
 		return _strPluginName;
 	}
 
-	const QString& GetPluginDll() const
+	const std::wstring& GetPluginDll() const
 	{
 		return _strPluginDll;
 	}
 
 	bool operator < (const IHXPluginObject& other) const
 	{
-		return _iPluginID < other._iPluginID;  //这里就改成小于号，QMap里的排序就成了升序和QMap<QString, int>默认排序一样了
+		return _iPluginID < other._iPluginID;  //这里就改成小于号，QMap里的排序就成了升序和QMap<std::wstring, int>默认排序一样了
 	}
 	bool operator > (const IHXPluginObject& other) const
 	{
-		return _iPluginID > other._iPluginID;  //这里就改成小于号，QMap里的排序就成了升序和QMap<QString, int>默认排序一样了
+		return _iPluginID > other._iPluginID;  //这里就改成小于号，QMap里的排序就成了升序和QMap<std::wstring, int>默认排序一样了
 	}
 	bool operator == (const IHXPluginObject& other) const
 	{
-		return _iPluginID == other._iPluginID;  //这里就改成小于号，QMap里的排序就成了升序和QMap<QString, int>默认排序一样了
+		return _iPluginID == other._iPluginID;  //这里就改成小于号，QMap里的排序就成了升序和QMap<std::wstring, int>默认排序一样了
 	}
 
 	IHXPluginObject(const IHXPluginObject& obj) = delete;
 	IHXPluginObject& operator == (const IHXPluginObject& other) = delete;
 protected:
 	int		_iPluginID;
-	QString	_strPluginName;
+	std::wstring	_strPluginName;
 	//	相对路径加名称
-	QString	_strPluginDll;
+	std::wstring	_strPluginDll;
 };
 typedef QSharedPointer<IHXPluginObject> IHXPluginObjectPtr;
 

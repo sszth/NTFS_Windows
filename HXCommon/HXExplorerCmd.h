@@ -1,6 +1,6 @@
 #pragma once
 #include <Windows.h>
-#include <QString>
+#include <string>
 #include <QVector>
 
 #define HX_DIRECTORYFLAG			0x10000000
@@ -28,15 +28,15 @@ typedef struct HXFileInfo
 	UINT64			m_u64CreateTime;
 	UINT64			m_u64ModifyTime;
 	UINT32			m_U32SubFile;
-	QString			m_szFileName;
+	std::wstring			m_szFileName;
 	//WCHAR			m_szFileName[MAX_PATH];
-}*PHXFileInfo, *LPHXFileInfo;
+}*PHXFileInfo, * LPHXFileInfo;
 
 typedef QVector<LPHXFileInfo> VecFileInfo;
 //Q_DECLARE_METATYPE(VecFileInfo);
 typedef struct CHXReadDirectory
 {
-	QString			m_wstrDirectory;
+	std::wstring			m_wstrDirectory;
 	VecFileInfo		m_listFileInfo;
 	/*
 	CHXReadDirectory() {}
@@ -55,10 +55,10 @@ typedef struct CHXReadDirectory
 		std::for_each(m_listFileInfo.cbegin(), m_listFileInfo.cend(), [](LPHXFileInfo pFileInfo) {
 			if (nullptr != pFileInfo)
 			{
-				delete pFileInfo; 
+				delete pFileInfo;
 				pFileInfo = nullptr;
 			}
-		});
+			});
 
 		m_listFileInfo.clear();
 	}
@@ -67,7 +67,7 @@ typedef struct CHXReadDirectory
 
 typedef struct CHXReadFileInfo
 {
-	QString			m_wstrDirectory;
+	std::wstring			m_wstrDirectory;
 	UINT64			m_u64CurPos;
 	UINT64			m_u64ReadSize;
 	UINT64			m_u64RealReadSize;
@@ -79,5 +79,5 @@ typedef struct CHXReadFileInfo
 
 typedef struct CHXRefreshFileInfo
 {
-	QString			m_wstrDirectory;
+	std::wstring			m_wstrDirectory;
 } *LPHXRefreshFileInfo;
