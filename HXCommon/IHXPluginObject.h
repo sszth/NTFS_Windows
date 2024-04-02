@@ -1,22 +1,26 @@
-#pragma once
+ï»¿#pragma once
+#ifdef _HX_USE_QT_
 #include <qsharedpointer.h>
+#else
+#include <memory>
+#endif // _HX_USE_QT_
 
 
 class IHXPluginObject
 {
 public:
-	explicit IHXPluginObject(	const int & iPluginID, 
-								const std::wstring & strPluginName,
-								const std::wstring & strFileName)
-								:_iPluginID(iPluginID), 
-								_strPluginName(strPluginName),
-								_strPluginDll(strFileName){}
-	explicit IHXPluginObject(	const int && iPluginID, 
-								const std::wstring && strPluginName,
-								const std::wstring && strFileName)
-								:_iPluginID(iPluginID),
-								_strPluginName(strPluginName),
-								_strPluginDll(strFileName) {}
+	explicit IHXPluginObject(const int & iPluginID,
+		const std::wstring & strPluginName,
+		const std::wstring & strFileName)
+		:_iPluginID(iPluginID),
+		_strPluginName(strPluginName),
+		_strPluginDll(strFileName) {}
+	explicit IHXPluginObject(const int && iPluginID,
+		const std::wstring && strPluginName,
+		const std::wstring && strFileName)
+		:_iPluginID(iPluginID),
+		_strPluginName(strPluginName),
+		_strPluginDll(strFileName) {}
 	virtual ~IHXPluginObject() {}
 
 public:
@@ -41,15 +45,15 @@ public:
 
 	bool operator < (const IHXPluginObject& other) const
 	{
-		return _iPluginID < other._iPluginID;  //ÕâÀï¾Í¸Ä³ÉĞ¡ÓÚºÅ£¬QMapÀïµÄÅÅĞò¾Í³ÉÁËÉıĞòºÍQMap<std::wstring, int>Ä¬ÈÏÅÅĞòÒ»ÑùÁË
+		return _iPluginID < other._iPluginID;  //è¿™é‡Œå°±æ”¹æˆå°äºå·ï¼ŒQMapé‡Œçš„æ’åºå°±æˆäº†å‡åºå’ŒQMap<std::wstring, int>é»˜è®¤æ’åºä¸€æ ·äº†
 	}
 	bool operator > (const IHXPluginObject& other) const
 	{
-		return _iPluginID > other._iPluginID;  //ÕâÀï¾Í¸Ä³ÉĞ¡ÓÚºÅ£¬QMapÀïµÄÅÅĞò¾Í³ÉÁËÉıĞòºÍQMap<std::wstring, int>Ä¬ÈÏÅÅĞòÒ»ÑùÁË
+		return _iPluginID > other._iPluginID;  //è¿™é‡Œå°±æ”¹æˆå°äºå·ï¼ŒQMapé‡Œçš„æ’åºå°±æˆäº†å‡åºå’ŒQMap<std::wstring, int>é»˜è®¤æ’åºä¸€æ ·äº†
 	}
 	bool operator == (const IHXPluginObject& other) const
 	{
-		return _iPluginID == other._iPluginID;  //ÕâÀï¾Í¸Ä³ÉĞ¡ÓÚºÅ£¬QMapÀïµÄÅÅĞò¾Í³ÉÁËÉıĞòºÍQMap<std::wstring, int>Ä¬ÈÏÅÅĞòÒ»ÑùÁË
+		return _iPluginID == other._iPluginID;  //è¿™é‡Œå°±æ”¹æˆå°äºå·ï¼ŒQMapé‡Œçš„æ’åºå°±æˆäº†å‡åºå’ŒQMap<std::wstring, int>é»˜è®¤æ’åºä¸€æ ·äº†
 	}
 
 	IHXPluginObject(const IHXPluginObject& obj) = delete;
@@ -57,8 +61,12 @@ public:
 protected:
 	int		_iPluginID;
 	std::wstring	_strPluginName;
-	//	Ïà¶ÔÂ·¾¶¼ÓÃû³Æ
+	//	ç›¸å¯¹è·¯å¾„åŠ åç§°
 	std::wstring	_strPluginDll;
 };
+#ifdef _HX_USE_QT_
 typedef QSharedPointer<IHXPluginObject> IHXPluginObjectPtr;
+#else
+typedef std::shared_ptr<IHXPluginObject> IHXPluginObjectPtr;
+#endif // _HX_USE_QT_
 

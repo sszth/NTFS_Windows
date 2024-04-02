@@ -1,8 +1,12 @@
 #pragma once
 #include <Windows.h>
 #include <string>
+#include <algorithm>
+#ifdef _HX_USE_QT_
 #include <QVector>
-
+#else
+#include <vector>
+#endif // _HX_USE_QT_
 #define HX_DIRECTORYFLAG			0x10000000
 
 #define MAX_PATH          260
@@ -32,7 +36,11 @@ typedef struct HXFileInfo
 	//WCHAR			m_szFileName[MAX_PATH];
 }*PHXFileInfo, * LPHXFileInfo;
 
+#ifdef _HX_USE_QT_
 typedef QVector<LPHXFileInfo> VecFileInfo;
+#else
+typedef std::vector<LPHXFileInfo> VecFileInfo;
+#endif // _HX_USE_QT_
 //Q_DECLARE_METATYPE(VecFileInfo);
 typedef struct CHXReadDirectory
 {
